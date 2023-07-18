@@ -1,0 +1,358 @@
+const express = require("express") // dùng thư viện express
+const app = express()
+const UserSchema = require("../model/UserSchema")
+const ProductSchema = require("../model/ProductSchema")
+const ExchangeProductSchema = require("../model/ExchangeProduct")
+
+const clientCurrent = {
+    "cart": {
+        "payment": false,
+        "order": []
+    },
+    "_id": "64aa4c3301483be3981f592e",
+    "name": "Nguyễn Văn Nguyên Bình",
+    "sex": "male",
+    "email": "nguyenbinm1014@gmail.com",
+    "phone": "0905897713",
+    "address": "Việt Nam",
+    "credit_card": "012123092222",
+    "nickname": "",
+    "password": "",
+    "cart": {
+        "payment": {
+            "discounted": 0,
+            "total": 0,
+            "preferential": "NONE"
+        },
+        "order": []
+    },
+    "__v": 0
+}
+
+class UserController {
+    // [GET]        /home
+    index = (req, res) => {
+        // req.query
+        // req là một object
+        res.json({ status: 200 })
+    }
+    login = (req, res, next) => {
+        UserSchema.find({})
+            .then((list) => {
+                UserSchema.find({})
+                    .then((users) => {
+                        const thisUser = users.find(user => user.nickname === req.body?.nickname)
+                        if (thisUser) {
+                            if (thisUser.password.trim() === req.body.password.trim()) {
+                                console.log("Đăng nhập thành công")
+                                res.json({
+                                    message: "Đăng nhập thành công",
+                                    status: 200,
+                                    id: thisUser._id
+                                })
+                            } else {
+                                res.json({
+                                    status: 400
+                                })
+                            }
+                        } else {
+                            res.json({
+                                status: 400
+                            })
+                        }
+                    })
+            })
+            .catch(next)
+    }
+    register = (req, res, next) => {
+        UserSchema.find({})
+            .then((list) => {
+                // kiểm tra xem tên đăng nhập đã có chưa
+                let findNicknameUser = list.filter(user => user.nickname === req.body.nickname)
+                // nếu chưa có thì lưu, không thì thôi
+                if (findNicknameUser[0] === undefined) {
+                    let newUser = new UserSchema(req.body)
+                    newUser.save()
+                }
+            })
+            .then(() => console.log("Đăng kí thành công!!"))
+            .then(() => res.json({ status: 200 }))
+            .catch(next)
+    }
+    get_infomation = (req, res, next) => {
+        UserSchema.findById(req.query.id)
+            .then(user => res.json({
+                data: user,
+                status: 200
+            }))
+    }
+    config = (req, res, next) => {
+
+    }
+    get_card = (req, res, next) => {
+
+        const { id } = req.query
+
+        UserSchema.findById(id)
+            .then(response => res.json(response))
+
+    }
+    update_quanlity_order = async (req, res, next) => {
+
+        // const updateOrder = async (userId, productId, quanlity) => {
+        //     // xử lý dữ liệu ở đây
+        //     const data = [
+        //         {
+        //             "_id": "64b11fb4de382565d01dc09e",
+        //             "name": "Mận",
+        //             "price": 13000,
+        //             "quanlity": 0,
+        //             "update": true,
+        //             "type": [
+        //                 "fruit"
+        //             ],
+        //             "__v": 0
+        //         }
+        //     ]
+        //     let order = []
+        //     const arr = await UserSchema.findById(userId, 'name _id cart')
+        //         .then(response => {
+        //             let products = [...response.cart.order]
+        //             // lọc qua các sản phẩm của người dùng
+        //             response.cart.order.forEach((product, index) => {
+        //                 // nếu như đã có sản phẩm đó
+        //                 // update sản phẩm nào?
+        //                 // update sản phẩm có _id là productId
+        //                 if (product._id === productId) {
+        //                     if (product.quanlity !== Number(quanlity)) {
+        //                         products[index].quanlity = Number(quanlity)
+
+        //                         console.log("Dữ liệu được chỉnh sửa")
+        //                         console.log(products)
+        //                         return products
+        //                     }
+        //                 }
+        //             });
+        //         })
+
+        //     return arr
+
+        // }
+        const updateOrder = async (userId, productId, quanlity) => {
+            const data = [
+                // Dữ liệu giả định
+                {
+                    "_id": "64b11fb4de382565d01dc09e",
+                    "name": "Mận",
+                    "price": 13000,
+                    "quantity": 0,
+                    "type": ["fruit"],
+                    "__v": 0
+                }
+            ];
+
+            try {
+                const response = await UserSchema.findById(userId, 'name _id cart');
+                let order = [...response.cart.order];
+
+
+                // Lọc qua các sản phẩm của người dùng
+
+                response.cart.order.forEach((product, index) => {
+                    // tìm ra id sản phẩm cần chỉnh sửa
+                    if (product._id === productId) {
+                        // nếu số lượng truyền vào khác số lượng hiện tại thì cập nhập số lượng và lưu lại
+                        if (product.quanlity !== Number(quanlity)) {
+                            order[index].quanlity = Number(quanlity);
+                        }
+                    } else {
+                        if (index === response.cart.order.length - 1) {
+                            UserSchema.findById(userId, 'cart')
+                                .then(data => {
+                                    order = data.cart.order
+                                })
+                        }
+                    }
+                });
+
+
+                return order;
+            } catch (error) {
+                console.error(error);
+                throw new Error('Lỗi trong quá trình xử lý dữ liệu');
+            }
+        };
+
+        const updatePayment = async () => {
+            return false
+        }
+
+        const { id, idP, quanlity } = req.body
+        UserSchema.findOneAndUpdate(
+            { _id: id }, // Điều kiện để tìm bản ghi cần cập nhật
+            {
+                $set: {
+                    'cart.payment.status': await updatePayment(), // Cập nhật trường payment thành true
+                    'cart.order': await updateOrder(id, idP, quanlity) // Cập nhật trường order thành một mảng rỗng
+                }
+            },
+            { new: true } // Lựa chọn để trả về bản ghi sau khi đã cập nhật
+        )
+            .then(updatedCart => res.json({
+                status: 200,
+                data: updatedCart.cart.order
+            }))
+    }
+    create_order = async (req, res, next) => {
+        const data = [
+            // Dữ liệu giả định
+            {
+                "_id": "64b11fb4de382565d01dc09e",
+                "name": "Mận",
+                "price": 13000,
+                "quantity": 0,
+                "__v": 0
+            }
+        ];
+        const { id, idP, quanlity } = req.body
+
+        const createNewProduct = async (idP, quanlity) => {
+
+            try {
+
+                const data = await ProductSchema.findById({ _id: idP }, 'name price quanlity')
+                //"64b11fb4de382565d01dc09e"
+
+                return {
+                    _id: idP,
+                    name: data.name,
+                    price: data.price,
+                    quanlity: quanlity
+                }
+
+            } catch (error) {
+                console.error(error);
+                throw new Error('Lỗi trong quá trình xử lý dữ liệu');
+            }
+        }
+        const ok = false
+        UserSchema.findOneAndUpdate(
+            { _id: id },
+            {
+                $push: {
+                    'cart.order': await createNewProduct(idP, quanlity)
+                },
+                $set: {
+                    'cart.payment.status': false
+                }
+            }, {
+            new: true
+        }
+        )
+            .then(response => res.json({
+                status: 200,
+                data: response
+            }))
+    }
+    delete_order = (req, res, next) => {
+        // xóa đơn hàng
+        const { id, idP } = req.query
+        UserSchema.updateOne(
+            { _id: id },
+            {
+                $pull: { 'cart.order': { _id: idP } }
+            })
+            .then((data) => res.json(data))
+
+
+    }
+    request_bill = async (req, res, next) => {
+        const { id, discount } = req.body
+        async function handleGetTotal() {
+            const response = await UserSchema.findById(id, 'cart')
+            let totalCost = 0
+
+            response.cart.order.forEach(product => {
+                totalCost += (product.quanlity * product.price)
+            })
+            return totalCost - (totalCost * Number(discount) / 100)
+        }
+        UserSchema.findOneAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    'cart.paymemt.discounted': 10,
+                    'cart.payment.total': await handleGetTotal()
+                }
+            }, { new: true }
+        )
+            .then(data => res.json(data))
+    }
+    recharge_money = async (req, res, next) => {
+
+    }
+    pay = (req, res, next) => {
+        res.json({
+            Payment: true
+        })
+    }
+    update_coin = async (req, res, next) => {
+
+        // const getCoin = async (id, coin) => {
+        //     let response = null
+        //     UserSchema.findById(id, 'coin')
+        //         .then((data) => console.log(data))
+        //     return 200
+        // }
+
+        // const { id, coin } = req.body
+        // UserSchema.findOneAndUpdate(
+        //     { _id: id },
+        //     {
+        //         $set: {
+        //             coin: await getCoin(coin)
+        //         }
+        //     },{
+        //         new: true
+        //     }
+        // )
+        // .then((updated) => res.status(200).json({
+        //     status: 200,
+        //     data: updated
+        // }))
+        const { id, coin } = req.body
+
+        UserSchema.findOneAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    coin: Number(coin)
+                }
+            }, {
+            new: true
+        }
+        )
+            .then(data => res.json({
+                _id: data._id,
+                name: data.name,
+                coin: data.coin
+            }))
+    }
+    reward_exchange_by_coin = async (req, res, next) => {
+        // id là id người mua,
+        // idP là id của sản phẩm ưu đãi
+        const { id, idP } = req.body
+
+        // tìm ra sản phẩm khuyến mãi
+        await ExchangeProductSchema.findById(idP, 'price remaining')
+            .then(exchangeProduct => {
+                await 
+            })
+
+    }
+}
+
+module.exports = new UserController;
+
+
+

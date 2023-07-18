@@ -1,0 +1,48 @@
+{
+  "proxy": "http://localhost:3001",
+  "name": "my-app",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "exp": "nodemon src/back-end/express/express.js",
+    "server": "nodemon src/server/server.js",
+    "dev": "concurrently \" npm start \" \" npm run server\""
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.17.11",
+    "axios": "^1.4.0",
+    "concurrently": "^8.0.1",
+    "cors": "^2.8.5",
+    "expo": "~48.0.15",
+    "expo-status-bar": "~1.4.4",
+    "express": "^4.18.2",
+    "install": "^0.13.0",
+    "method-override": "^3.0.0",
+    "mongoose": "^7.2.1",
+    "nodemon": "^2.0.22",
+    "npm": "^9.8.0",
+    "react": "18.2.0",
+    "react-native": "0.71.8",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-linear-gradient": "^2.7.3",
+    "react-native-popover-view": "^5.1.7",
+    "react-native-shadow": "^1.2.2",
+    "react-native-textinput-effects": "^0.6.3",
+    "react-native-vector-icons": "^9.2.0",
+    "react-navigation": "^4.4.4",
+    "react-router-native": "^6.11.2",
+    "socket.io": "^4.7.1",
+    "socket.io-client": "^4.7.1",
+    "expo-linear-gradient": "~12.1.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "node-sass": "^9.0.0",
+    "react-native-sass-transformer": "^2.0.0"
+  },
+  "private": true
+}
