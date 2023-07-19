@@ -196,22 +196,12 @@ function Cateory() {
                 // }, () => {}, (data) => {
 
                 // })
-                await userDataCurrent.current.cart.order.forEach((order, index) => {
-                    
-                    if (order._id === idP) { // sau khi thêm/ chỉnh số lượng thì phải gọi API về để lấy ra cart hiện tại để check tiếp order
-                        
-                    } else {
-                        if (index === userDataCurrent.current.cart.order.length - 1) {
-                            putAPI(`http://${IP}:5000/api/user/cart/update/create`, {
-                                id: userData._id,
-                                idP: idP,   
-                                quanlity: newQuanlity
-                            })
-                            
-                        }
-                    }
+                await putAPI(`http://${IP}:5000/api/user/cart/update/create`, {
+                    id: userDataCurrent.current._id,
+                    idP: idP,
+                    quanlity: newQuanlity
                 })
-                
+
 
                 // chỉnh sửa só lượng của sản phẩm
                 await putAPI(`http://${IP}:5000/api/user/cart/update/quanlity`, {

@@ -13,6 +13,7 @@ function Bill() {
     const [submit, setSubmit] = useState(false)
 
     const request_bill = useCallback(() => {
+
         putAPI(`http://${IP}:5000/api/user/cart/pay`, {
             id: userDataCurrent.current._id,
             discount: userDataCurrent.current.cart.payment.discounted
@@ -25,7 +26,7 @@ function Bill() {
         request_bill()
     }, [])
 
-    const TagProduct = memo(({ id, img, name, quanlity, price }) => {
+    const TagProduct = memo(({ id, img, name, quanlity, price, index }) => {
 
         const [newQuanlity, setNewQuanlity] = useState(Number(quanlity))
         const [timer, setTimer] = useState(null)
@@ -69,7 +70,7 @@ function Bill() {
             })
         }
         return (
-            <View key={id} style={styles.tagProduct}>
+            <View key={index} style={styles.tagProduct}>
                 <View style={styles.img}>
                     <Image
                         style={styles.tagImg}
@@ -117,7 +118,7 @@ function Bill() {
                         width: "100%",
                         fontWeight: 900,
                         textAlign: "center"
-                    }}>{newQuanlity * price} vnđ</Text>
+                    }}>{(newQuanlity * price).toLocaleString('vi-VN')} vnđ</Text>
                 </View>
             </View>
         )
@@ -151,9 +152,9 @@ function Bill() {
                 <Text style={styles.totalProduct}>Tổng:</Text>
             </View>
             <View style={styles.main}>
-                {cart.map(product => {
+                {cart.map((product, index) => {
                     return <TagProduct
-                        key={product._id}
+                        key={index}
                         id={product._id}
                         name={product.name}
                         quanlity={product.quanlity}
@@ -169,7 +170,7 @@ function Bill() {
                     paddingTop: 20
                 }]}>Tổng:</Text>
                 <View style={styles.summaryPrice}>
-                    <Text style={{ color: "lightgreen", fontWeight: 900 }}>{total} vnđ</Text>
+                    <Text style={{ color: "lightgreen", fontWeight: 900 }}>{total.toLocaleString('vi-VN')} vnđ</Text>
                 </View>
             </View>
             <Submit />

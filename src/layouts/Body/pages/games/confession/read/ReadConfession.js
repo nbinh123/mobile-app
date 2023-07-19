@@ -112,7 +112,7 @@ function ReadConfession() {
                 }
             })
         }
-        handleShowModal("Lưu ý", "Bạn có chắc muốn xóa confession này?", handleDelete)
+        handleDelete()
     }
 
     const Main = () => {

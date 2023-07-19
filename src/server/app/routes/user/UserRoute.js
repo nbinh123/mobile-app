@@ -3,7 +3,7 @@ const router = express.Router()
 
 const LoginController = require("../../controllers/UserControllers")
 
-router.use('/login', LoginController.login)
+router.post('/login', LoginController.login)
 router.post('/register', LoginController.register)
 router.get('/get', LoginController.get_infomation)
 router.patch('/config', LoginController.config)

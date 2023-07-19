@@ -5,6 +5,7 @@ import { useContext, useState } from "react";
 import GlobalContext from "../../../../hooks/useGlobalContext/GlobalContext";
 import postAPI from "../../../../server/axios/postAPI";
 import getAPI from "../../../../server/axios/getAPI";
+import axios from "axios";
 
 const styles = StyleSheet.create({
     container: {
@@ -67,22 +68,47 @@ const styles = StyleSheet.create({
 function Login() {
 
 
-    const { setIsLogined, IP, setUserData } = useContext(GlobalContext)
+    const { setIsLogined, IP, setUserData, userDataCurrent } = useContext(GlobalContext)
     const [nickname, setNickname] = useState("")
     const [password, setPassword] = useState("")
 
-    const submit = () => {
-        // gửi dữ liệu lên server và xử lý
+    // gửi dữ liệu lên server và xử lý
+    // postAPI(`http://${IP}:5000/api/user/login`, {
+    //     nickname: nickname,
+    //     password: password
+    // }, (data) => {
+    //     console.log(data)
+    //     if (data.status == 200) {
+    //         setIsLogined(true)
+    //         getAPI(`http://${IP}:5000/api/user/get`, {
+    //             id: data.id
+    //         }, (response) => {
+    //             console.log(response)
+    //             setUserData(response.data)
+    //         })
+    //     }
+    // })
+    const submit = async () => {
+        // setIsLogined(true)
+        // await getAPI(`http://${IP}:5000/api/user/get`, {
+        //     id: "64aa4c3301483be3981f592e"
+        // }, (response) => {
+        //     userDataCurrent.current = response.data
+        //     console.log(response)
+        //     setUserData(response.data)
+        // })
+
+
         postAPI(`http://${IP}:5000/api/user/login`, {
             nickname: nickname,
             password: password
-        }, (data) => {
+        }, async (data) => {
             console.log(data)
             if (data.status == 200) {
                 setIsLogined(true)
-                getAPI(`http://${IP}:5000/api/user/get`, {
+                await getAPI(`http://${IP}:5000/api/user/get`, {
                     id: data.id
-                }, (response) => {
+                }, async (response) => {
                     console.log(response)
                     setUserData(response.data)
                 })
@@ -118,7 +144,7 @@ function Login() {
                 </View>
             </View>
             <View style={styles.register}>
-                <Link style={styles.linkRegis} to={"/register"}><Text style={[styles.titleRegis, {color: "#c4c4ff"}]}>Chưa có tài khoản?</Text></Link>
+                <Link style={styles.linkRegis} to={"/register"}><Text style={[styles.titleRegis, { color: "#c4c4ff" }]}>Chưa có tài khoản?</Text></Link>
             </View>
             <View style={styles.submit}>
                 <Button

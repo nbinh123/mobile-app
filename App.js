@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
 });
-const IP = "192.168.1.6"
+const IP = "192.168.1.57" 
 const socket = io.connect(`http://${IP}:5000`)
 
 export default function App() {

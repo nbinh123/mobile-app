@@ -40,7 +40,7 @@ function Shop() {
 
     const navigate = useNavigate()
 
-    const { IP } = useContext(GlobalContext)
+    const { IP, userDataCurrent } = useContext(GlobalContext)
     const [productList, setProductList] = useState([])
     const [page, setPage] = useState(1)
 

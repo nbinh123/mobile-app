@@ -69,7 +69,7 @@ route(app)
 
 
 
-const IP = "192.168.1.6"
+const IP = "192.168.1.57"
 const { Server } = require("socket.io")
 const io = new Server(server, {
     // Cấu hình socket.io sử dụng đường dẫn /socket.io

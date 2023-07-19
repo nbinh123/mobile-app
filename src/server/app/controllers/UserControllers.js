@@ -3,6 +3,7 @@ const app = express()
 const UserSchema = require("../model/UserSchema")
 const ProductSchema = require("../model/ProductSchema")
 const ExchangeProductSchema = require("../model/ExchangeProduct")
+const ShippingOrderSchema = require("../model/ShippingOrder")
 
 const clientCurrent = {
     "cart": {
@@ -34,35 +35,31 @@ class UserController {
     index = (req, res) => {
         // req.query
         // req là một object
-        res.json({ status: 200 })
+        UserSchema.findOneAndUpdate(
+            { _id: "64aa4c3301483be3981f592e" },
+            {
+                $set: {
+                    'cart.order': []
+                }
+            }, {
+            new: true
+        }
+        )
+            .then(data => res.json(data))
     }
-    login = (req, res, next) => {
-        UserSchema.find({})
-            .then((list) => {
-                UserSchema.find({})
-                    .then((users) => {
-                        const thisUser = users.find(user => user.nickname === req.body?.nickname)
-                        if (thisUser) {
-                            if (thisUser.password.trim() === req.body.password.trim()) {
-                                console.log("Đăng nhập thành công")
-                                res.json({
-                                    message: "Đăng nhập thành công",
-                                    status: 200,
-                                    id: thisUser._id
-                                })
-                            } else {
-                                res.json({
-                                    status: 400
-                                })
-                            }
-                        } else {
-                            res.json({
-                                status: 400
-                            })
-                        }
+    login = async (req, res, next) => {
+
+        const { nickname, password } = req.body
+        await UserSchema.find({ nickname: nickname })
+            .then(data => {
+                if (data[0].password === password) {
+                    res.json({
+                        data: data,
+                        status: 200,
+                        message: "Đăng nhập thành công"
                     })
+                }
             })
-            .catch(next)
     }
     register = (req, res, next) => {
         UserSchema.find({})
@@ -98,7 +95,6 @@ class UserController {
 
     }
     update_quanlity_order = async (req, res, next) => {
-
         // const updateOrder = async (userId, productId, quanlity) => {
         //     // xử lý dữ liệu ở đây
         //     const data = [
@@ -156,6 +152,7 @@ class UserController {
                 let order = [...response.cart.order];
 
 
+
                 // Lọc qua các sản phẩm của người dùng
 
                 response.cart.order.forEach((product, index) => {
@@ -204,16 +201,7 @@ class UserController {
             }))
     }
     create_order = async (req, res, next) => {
-        const data = [
-            // Dữ liệu giả định
-            {
-                "_id": "64b11fb4de382565d01dc09e",
-                "name": "Mận",
-                "price": 13000,
-                "quantity": 0,
-                "__v": 0
-            }
-        ];
+
         const { id, idP, quanlity } = req.body
 
         const createNewProduct = async (idP, quanlity) => {
@@ -281,7 +269,7 @@ class UserController {
             { _id: id },
             {
                 $set: {
-                    'cart.paymemt.discounted': 10,
+                    'cart.paymemt.discounted': 0,
                     'cart.payment.total': await handleGetTotal()
                 }
             }, { new: true }
@@ -295,6 +283,11 @@ class UserController {
         res.json({
             Payment: true
         })
+    }
+    get_coin = async (req, res, next) => {
+        const { id } = req.query
+        await UserSchema.findById(id, 'coin')
+            .then(coin => res.json(coin))
     }
     update_coin = async (req, res, next) => {
 
@@ -344,9 +337,55 @@ class UserController {
         const { id, idP } = req.body
 
         // tìm ra sản phẩm khuyến mãi
-        await ExchangeProductSchema.findById(idP, 'price remaining')
-            .then(exchangeProduct => {
-                await 
+
+        async function getCoin(price, idProduct, nameProduct) {
+            const data = await UserSchema.findById(id, '_id name coin')
+            // xử lý thêm order ở đây luôn
+            // const newOrder = new ShippingOrderSchema({
+            //     deliver: "Admin",
+            //     receiver: data._id,
+            //     type: "endow",
+            //     order: [
+            //         {
+            //             _id: idProduct,
+            //             name: nameProduct
+            //         }
+            //     ]
+            // })
+            // await newOrder.save()
+
+
+            return Number(data.coin - price)
+        }
+        await ExchangeProductSchema.findById(idP, 'name price remaining')
+            .then(async (exchangeProduct) => {
+
+                if (exchangeProduct.remaining > 0) {
+                    // giảm coin của user tương ứng với giá của sản phẩm
+                    await UserSchema.findOneAndUpdate(
+                        { _id: id },
+                        {
+                            $set: {
+                                coin: await getCoin(Number(exchangeProduct.price, exchangeProduct._id, exchangeProduct.name))
+                            }
+                        }, {
+                        new: true
+                    }
+                    )
+
+                    // update lại số lượng của sản phẩm
+                    await ExchangeProductSchema.findOneAndUpdate(
+                        { _id: idP },
+                        {
+                            $set: {
+                                remaining: exchangeProduct.remaining - 1
+                            }
+                        }, {
+                        new: true
+                    }
+                    )
+                        .then(newP => res.json(newP))
+                }
             })
 
     }
