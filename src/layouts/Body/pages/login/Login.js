@@ -111,6 +111,8 @@ function Login() {
                 }, async (response) => {
                     console.log(response)
                     setUserData(response.data)
+                    userDataCurrent.current = response.data
+
                 })
             }
         })

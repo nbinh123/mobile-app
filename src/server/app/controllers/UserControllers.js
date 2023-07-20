@@ -215,7 +215,7 @@ class UserController {
                     _id: idP,
                     name: data.name,
                     price: data.price,
-                    quanlity: quanlity
+                    quanlity: Number(quanlity)
                 }
 
             } catch (error) {
@@ -279,10 +279,23 @@ class UserController {
     recharge_money = async (req, res, next) => {
 
     }
-    pay = (req, res, next) => {
-        res.json({
-            Payment: true
-        })
+    pay = async (req, res, next) => {
+        // cần có API kết nối với ngân hàng
+        // tạo đơn hàng trước rồi thanh toán ngân hàng sau
+        const { type, id } = req.body
+
+        await UserSchema.findById(id)
+            .then(async (userData) => {
+                const newOrder = new ShippingOrderSchema({
+                    deliver: "Admin",
+                    receiver: id,
+                    type: "normal",
+                    total: userData.cart.payment.total,
+                    order: [...userData.cart.order``]
+                })
+                await newOrder.save()
+                    .then((data) => res.status(200).json(data))
+            })
     }
     get_coin = async (req, res, next) => {
         const { id } = req.query
