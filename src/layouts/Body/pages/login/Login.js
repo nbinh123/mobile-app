@@ -71,51 +71,50 @@ function Login() {
     const { setIsLogined, IP, setUserData, userDataCurrent } = useContext(GlobalContext)
     const [nickname, setNickname] = useState("")
     const [password, setPassword] = useState("")
+    const [info, setInfo] = useState({
+        _id: "",
+        status: 400
+    })
 
-    // gửi dữ liệu lên server và xử lý
-    // postAPI(`http://${IP}:5000/api/user/login`, {
-    //     nickname: nickname,
-    //     password: password
-    // }, (data) => {
-    //     console.log(data)
-    //     if (data.status == 200) {
-    //         setIsLogined(true)
-    //         getAPI(`http://${IP}:5000/api/user/get`, {
-    //             id: data.id
-    //         }, (response) => {
-    //             console.log(response)
-    //             setUserData(response.data)
-    //         })
-    //     }
-    // })
     const submit = async () => {
-        // setIsLogined(true)
-        // await getAPI(`http://${IP}:5000/api/user/get`, {
-        //     id: "64aa4c3301483be3981f592e"
-        // }, (response) => {
-        //     userDataCurrent.current = response.data
-        //     console.log(response)
-        //     setUserData(response.data)
-        // })
 
-
-        postAPI(`http://${IP}:5000/api/user/login`, {
+        console.log("đăng nhập")
+        async function log(id, status) {
+            if (status === 200) {
+                await getAPI(`http://${IP}:5000/api/user/get`, {
+                    id: id
+                }, () => { },
+                    async (response) => {
+                        setIsLogined(true)
+                        // console.log(response)
+                        setUserData(response.data)
+                        userDataCurrent.current = response.data
+                    })
+            }
+        }
+        await postAPI(`http://${IP}:5000/api/user/login`, {
             nickname: nickname,
             password: password
         }, async (data) => {
-            console.log(data)
-            if (data.status == 200) {
-                setIsLogined(true)
-                await getAPI(`http://${IP}:5000/api/user/get`, {
-                    id: data.id
-                }, async (response) => {
-                    console.log(response)
-                    setUserData(response.data)
-                    userDataCurrent.current = response.data
-
-                })
-            }
+            await log(data.data[0]._id, data.status)
         })
+
+
+        // axios.post(`http://${IP}:5000/api/user/login`, {
+        //     nickname: nickname,
+        //     password: password
+        // }, {
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // })
+        //     .then(async (response) => {
+        //         await log(response.data.data[0]._id, data.status)
+        //     })
+        //     .catch(error => {
+        //         console.log(error);
+        //     });
+
     }
 
     const getText = (text, channel) => {

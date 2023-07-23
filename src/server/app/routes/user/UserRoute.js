@@ -6,7 +6,7 @@ const LoginController = require("../../controllers/UserControllers")
 router.post('/login', LoginController.login)
 router.post('/register', LoginController.register)
 router.get('/get', LoginController.get_infomation)
-router.patch('/config', LoginController.config)
+router.put('/info/update', LoginController.update_infomations)
 
 router.put('/cart/pay', LoginController.request_bill)
 
@@ -17,8 +17,11 @@ router.delete('/cart/update/delete', LoginController.delete_order)
 
 router.post('/cart/bill/pay', LoginController.pay)
 
+router.get('/coin/get', LoginController.get_coin)
 router.put('/coin/update', LoginController.update_coin)
 router.post('/coin/buy', LoginController.reward_exchange_by_coin)
+
+router.put('/config/update', LoginController.config)
 
 router.use('/', LoginController.index)
 

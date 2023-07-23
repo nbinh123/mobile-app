@@ -12,6 +12,8 @@ const fs = require("fs")
 const path = require('path');
 const route = require("../server/app/routes/index")
 
+const socket = require("./app/socket/socket")
+
 // server sẽ chạy ở port 5000
 server.listen(5000, () => {
     console.log("Listening at port 5000")
@@ -69,7 +71,7 @@ route(app)
 
 
 
-const IP = "192.168.1.57"
+const IP = "192.168.1.7"
 const { Server } = require("socket.io")
 const io = new Server(server, {
     // Cấu hình socket.io sử dụng đường dẫn /socket.io
@@ -88,17 +90,7 @@ const io = new Server(server, {
 
 const online_members = []
 io.on('connection', (socket) => {
-    let distance = 0
-    let windy = 0
-    let height = 0
-
-    let windyWay = "forward"
-    let differenceHeight = "more"
-    // ouput: góc, lực
-    let angle
-    let force
-
-    let totalPart = 0
+    let distance = 0, windy = 0, height = 0, windyWay = "forward", differenceHeight = "more", angle, force, totalPart = 0
 
     let checkDistance = () => {
         // khoảng cách sẽ không phân biệt gió ngược hay thuận

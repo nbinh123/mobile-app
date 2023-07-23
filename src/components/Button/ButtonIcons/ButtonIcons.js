@@ -6,7 +6,9 @@ function ButtonIcons({
     backgroundColor = "#4c4cfa",
     right = 13,
     bottom = 13, 
-    padding = 16
+    padding = 16,
+    borderWidth = 0.5,
+    borderColor = "#4c4cfa",
 }) {
 
     const styles = StyleSheet.create({
@@ -18,7 +20,8 @@ function ButtonIcons({
             backgroundColor: backgroundColor,
             opacity: 0.8,
             borderRadius: 50,
-            borderColor: "#4c4cfa",
+            borderWidth: borderWidth,
+            borderColor: borderColor,
         }
     })
 

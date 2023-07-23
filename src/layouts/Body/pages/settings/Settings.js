@@ -1,7 +1,8 @@
-import { useContext } from "react";
+import { memo, useContext, useRef, useState, memo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import GlobalContext from "../../../../hooks/useGlobalContext/GlobalContext";
 import Button from "../../../../components/Button/Button";
+import Title from "../../../../components/Title/Title";
 
 const styles = StyleSheet.create({
     container: {
@@ -11,51 +12,102 @@ const styles = StyleSheet.create({
     },
     configButton: {
         position: "relative",
-        width: "100%"
+        height: "100%",
+        aspectRatio: 1 / 1,
+        flexDirection: "row"
     },
     mode: {
         position: "absolute",
         width: "100%"
     },
     left: {
-        left: 0
+        alignItems: "flex-start",
     },
     right: {
-        right: 0
+        alignItems: "flex-end"
     }
 })
 
 function Settings() {
 
     const { userData } = useContext(GlobalContext)
-    function ConfigTag({ id, key, isTrue }) {
+    const configList = useRef([
+        {
+            nameKey: 1,
+            value: userData.config.onShareLocation,
+            vn: "Chia sẻ vị trí cho mọi người"
+        }, {
+            nameKey: 2,
+            value: userData.config.onReceiveFromStranger,
+            vn: "Nhận tin nhắn từ người lạ"
+        }, {
+            nameKey: 3,
+            value: userData.config.onGetPromoteNofications,
+            vn: "Nhận thông báo ưu đãi"
+        }
+    ])
+
+
+    const ConfigTag = memo(({ id, isTrue, nameKey }) => {
+
+        const [on, setOn] = useState(isTrue)
+
+        const onCheckNameKey = () => {
+            let nameKey = ''
+            switch (id) {
+                case 1:
+                    return "Chia sẻ vị trí với mọi người"
+                    break;
+                case 2:
+                    return "Nhận tin nhắn từ người lạ"
+                    break;
+                case 3:
+                    return "Nhận thông báo ưu đãi"
+                    break;
+                default:
+                    break;
+            }
+        }
 
         const check = (isTrue === true ? styles.right : styles.left)
-        const toogle = (id) => {
-            
+        const toogle = () => {
+            setOn(!on)
         }
 
         return (
-            <TouchableOpacity onPress={toogle} style={[styles.configButton, styles.publicPhone]}>
-                <View style={[styles.mode, check]}>
+            <View style={[styles.configButton, styles.publicPhone]}>
+                <View style={styles.nameKey}>
+                    <Text>{nameKey}</Text>
+                </View>
+                <View style={[styles.mode, on]}>
                     <Button
                         title={""}
+                        onClicked={toogle}
                     />
                 </View>
-            </TouchableOpacity>
+            </View>
         )
-    }
+    })
+
+
 
     return (
         <View style={styles.container}>
-            <View style={styles.title}>
-                <Text style={styles.textTitle}>Cài đặt</Text>
-            </View>
+            <Title
+                title={"Cài đặt"}
+            />
             <View style={styles.config}>
                 <View style={styles.public}>
-                    <ConfigTag id={userData._id} key={"address"} isTrue={userData?.show?.address}/>
-                    <ConfigTag id={userData._id} key={"phone"} isTrue={userData?.show?.phone}/>
-                    <ConfigTag id={userData._id} key={"friend_list"} isTrue={userData?.show?.friend_list}/>
+                    {configList.current.map((configs) => {
+                        return (
+                            <ConfigTag
+                                key={configs.nameKey}
+                                isTrue={configs.value}
+                                id={configs.nameKey}
+                                nameKey={configs.vn}
+                            />
+                        )
+                    })}
                 </View>
             </View>
         </View>

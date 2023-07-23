@@ -3,6 +3,7 @@ import Title from "../../../../../components/Title/Title";
 import { useContext, useEffect, useState, memo, useCallback } from "react";
 import GlobalContext from "../../../../../hooks/useGlobalContext/GlobalContext";
 import putAPI from "../../../../../server/axios/putAPI";
+import getAPI from "../../../../../server/axios/getAPI";
 import AntDesignIcon from "react-native-vector-icons/AntDesign"
 
 function Bill() {
@@ -10,14 +11,16 @@ function Bill() {
     const { userDataCurrent, IP } = useContext(GlobalContext)
     const [total, setTotal] = useState(0)
     const [cart, setCart] = useState([])
+    const [promote, setPromote] = useState(userDataCurrent.current.cart.payment.discounted)
     const [submit, setSubmit] = useState(false)
 
-    const request_bill = useCallback(() => {
+    const request_bill = useCallback(async () => {
 
-        putAPI(`http://${IP}:5000/api/user/cart/pay`, {
+        await putAPI(`http://${IP}:5000/api/user/cart/pay`, {
             id: userDataCurrent.current._id,
-            discount: userDataCurrent.current.cart.payment.discounted
+            discount: promote
         }, (response) => {
+            setPromote(response.cart.payment.discounted)
             setTotal(response.cart.payment.total)
             setCart(response.cart.order)
         })
@@ -36,9 +39,9 @@ function Bill() {
             if (timer) {
                 clearTimeout(timer)
             }
-            const newTimer = setTimeout(() => {
-                update()
-            }, 2000)
+            const newTimer = setTimeout(async () => {
+                await update("more")
+            }, 700)
             setTimer(newTimer)
         }
         const decQuan = () => {
@@ -47,19 +50,21 @@ function Bill() {
                 if (timer) {
                     clearTimeout(timer)
                 }
-                const newTimer = setTimeout(() => {
-                    update()
-                }, 2000)
+                const newTimer = setTimeout(async () => {
+                    await update()
+                }, 700)
                 setTimer(newTimer)
             }
         }
-        const update = async () => {
+        const update = async (type) => {
             // cập nhật số lượng
-            await putAPI(`http://${IP}:5000/api/user/cart/update/create`, {
+            await putAPI(`http://${IP}:5000/api/user/cart/update/quanlity`, {
                 id: userDataCurrent.current._id,
                 idP: id,
-                quanlity: newQuanlity
+                quanlity: (type === "more" ? newQuanlity + 1 : newQuanlity - 1)
             })
+
+            await request_bill()
 
             // cập nhật lại giá
             await putAPI(`http://${IP}:5000/api/user/cart/pay`, {
@@ -125,19 +130,45 @@ function Bill() {
     })
 
     const Submit = () => {
+        function Promote() {
+
+            const [promoteCode, setPromoteCode] = useState("")
+            const [promodeCodeList, setPromoteCodeList] = useState([])
+            useEffect(() => {
+                getAPI(`http://${IP}:5000/api/user/get`, {
+                    id: userDataCurrent.current._id
+                }, () => { },
+                    (response) => {
+                        setPromoteCodeList(response.data.cart.promoteCodes)
+                    })
+            }, [])
+
+            return (
+                <View style={styles.promote}>
+                    <Text style={{ color: "white" }}>Chọn mã khuyến mãi:</Text>
+                    <TouchableOpacity onPress={() => console.log(promodeCodeList)}>
+                        <Text>123456</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+        }
 
         // tạo biến động cho animation
-        function onCheckOrders(){
+        function onCheckOrders() {
             // xử lý thanh toán
             setSubmit(!submit)
         }
         const [submit, setSubmit] = useState(false)
         const now = (submit ? styles.isSubmit : styles.noSubmit)
 
+        // bây giờ sẽ chia phương thức thanh toán và gọi API tạo 1 đơn hàng, sau đó xóa đi mảng sản phẩm
         return (
-            <TouchableOpacity onPress={onCheckOrders} style={[styles.checkOrder, now]}>
-                <AntDesignIcon name="check" size={18} color={submit ? "green" : "white"} />
-            </TouchableOpacity>
+            <View style={styles.submit}>
+                <Promote />
+                <TouchableOpacity onPress={onCheckOrders} style={[styles.checkOrder, now]}>
+                    <AntDesignIcon name="check" size={18} color={submit ? "green" : "white"} />
+                </TouchableOpacity>
+            </View>
         )
     }
 
@@ -168,9 +199,21 @@ function Bill() {
                     flex: 1.96,
                     paddingVertical: 3,
                     paddingTop: 20
-                }]}>Tổng:</Text>
+                }]}>Tổng {promote !== 0 ? <Text style={{ color: "lightgreen" }}>(-{promote}%)</Text> : ""}:</Text>
                 <View style={styles.summaryPrice}>
-                    <Text style={{ color: "lightgreen", fontWeight: 900 }}>{total.toLocaleString('vi-VN')} vnđ</Text>
+                    {promote == 0 ? (
+                        <Text style={{ color: "lightgreen", fontWeight: 900 }}>{total.toLocaleString('vi-VN')} vnđ</Text>
+                    ) : (
+                        <>
+                            <Text style={{
+                                color: "#8f998e",
+                                fontWeight: 900,
+                                fontSize: 10,
+                                textDecorationLine: 'line-through'
+                            }}>{(total / (promote / 100)).toLocaleString('vi-VN')} vnđ</Text>
+                            <Text style={{ color: "lightgreen", fontWeight: 900 }}>{total.toLocaleString('vi-VN')} vnđ</Text>
+                        </>
+                    )}
                 </View>
             </View>
             <Submit />
@@ -281,7 +324,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderWidth: 1,
         borderTopWidth: 0,
-        borderColor: "white"
+        borderColor: "white",
+        position: "relative"
     },
     isSubmit: {
         backgroundColor: "lightgreen"

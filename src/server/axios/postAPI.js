@@ -1,7 +1,7 @@
 import axios from "axios";
 
-function postAPI(url, paramCondition, callback) {
-    axios.post(url, paramCondition, {
+async function postAPI(url, paramCondition, callback) {
+    await axios.post(url, paramCondition, {
         headers: {
             'Content-Type': 'application/json'
         }

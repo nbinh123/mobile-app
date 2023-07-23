@@ -31,7 +31,7 @@ const clientCurrent = {
 }
 
 class UserController {
-    // [GET]        /home
+    // [GET]        /
     index = (req, res) => {
         // req.query
         // req là một object
@@ -47,6 +47,7 @@ class UserController {
         )
             .then(data => res.json(data))
     }
+    // [POST]       /login
     login = async (req, res, next) => {
 
         const { nickname, password } = req.body
@@ -61,6 +62,7 @@ class UserController {
                 }
             })
     }
+    // [POST]       /register
     register = (req, res, next) => {
         UserSchema.find({})
             .then((list) => {
@@ -76,6 +78,7 @@ class UserController {
             .then(() => res.json({ status: 200 }))
             .catch(next)
     }
+    // [GET]        /get
     get_infomation = (req, res, next) => {
         UserSchema.findById(req.query.id)
             .then(user => res.json({
@@ -83,9 +86,80 @@ class UserController {
                 status: 200
             }))
     }
-    config = (req, res, next) => {
+    // [PUT]        /config
+    config = async (req, res, next) => {
 
+        let updateKey = ""
+        async function returnConfig(which, boolean) {
+
+            switch (which) {
+                case 1:
+                    updateKey = 'config.onShareLocation'
+                    break;
+                case 2:
+                    updateKey = 'config.onReceiveFromStranger'
+                    break;
+                case 3:
+                    updateKey = 'config.onGetPromoteNofications'
+                    break;
+                default:
+                    break;
+            }
+
+            return updateKey
+        }
+
+
+        const { id, which, boo } = req.body
+        await returnConfig(Number(which))
+            .then(upKey => updateKey = upKey)
+
+        await UserSchema.findOneAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    [updateKey]: Boolean(Number(boo))
+                }
+            }
+            , {
+                new: true
+            }
+        )
+            .then(data => res.json(data))
     }
+    update_infomations = async (req, res, next) => {
+        const { id, which } = req.body
+        // let which = [
+        //     {
+        //         nameKey: "name",
+        //         value: "Bình"
+        //     }, {
+        //         nameKey: "phone",
+        //         value: "0123456789"
+        //     }
+        // ]
+        // lấy ra thông tin hiện tại
+        const infoCurrent = await UserSchema.findById(id)
+
+        // nếu như trong which có trường nào thì sẽ update trường đó
+        async function filter() {
+            which.forEach(keys => {
+                if (infoCurrent[keys.nameKey] !== keys.value) {
+                    infoCurrent[keys.nameKey] = keys.value
+                    // console.log(infoCurrent[keys.nameKey])
+                }
+            })
+        }
+        // chạy hàm update
+        await filter()
+        // bắt đầu lưu lại bản ghi và trả về bản ghi mới
+        await infoCurrent.save()
+            .then((updatedInfomations) => {
+                res.json(updatedInfomations)
+                console.log("lưu thành công")
+            })
+    }
+    //  [GET]       /cart/get
     get_card = (req, res, next) => {
 
         const { id } = req.query
@@ -94,6 +168,7 @@ class UserController {
             .then(response => res.json(response))
 
     }
+    //  [PUT]       /cart/update/quanlity
     update_quanlity_order = async (req, res, next) => {
         // const updateOrder = async (userId, productId, quanlity) => {
         //     // xử lý dữ liệu ở đây
@@ -200,6 +275,7 @@ class UserController {
                 data: updatedCart.cart.order
             }))
     }
+    //  [PUT]       /cart/update/create
     create_order = async (req, res, next) => {
 
         const { id, idP, quanlity } = req.body
@@ -242,6 +318,7 @@ class UserController {
                 data: response
             }))
     }
+    //  [DELETE]    /cart/update/delete
     delete_order = (req, res, next) => {
         // xóa đơn hàng
         const { id, idP } = req.query
@@ -254,6 +331,7 @@ class UserController {
 
 
     }
+    // [PUT]       /cart/pay
     request_bill = async (req, res, next) => {
         const { id, discount } = req.body
         async function handleGetTotal() {
@@ -279,6 +357,7 @@ class UserController {
     recharge_money = async (req, res, next) => {
 
     }
+    //  [POST]      /cart/bill/pay
     pay = async (req, res, next) => {
         // cần có API kết nối với ngân hàng
         // tạo đơn hàng trước rồi thanh toán ngân hàng sau
@@ -297,11 +376,13 @@ class UserController {
                     .then((data) => res.status(200).json(data))
             })
     }
+    //  [GET]       /coin/get
     get_coin = async (req, res, next) => {
         const { id } = req.query
         await UserSchema.findById(id, 'coin')
             .then(coin => res.json(coin))
     }
+    //  [PUT]       /coin/update
     update_coin = async (req, res, next) => {
 
         // const getCoin = async (id, coin) => {
@@ -344,6 +425,7 @@ class UserController {
                 coin: data.coin
             }))
     }
+    //  [POST]      /coin/buy
     reward_exchange_by_coin = async (req, res, next) => {
         // id là id người mua,
         // idP là id của sản phẩm ưu đãi

@@ -16,6 +16,7 @@ import Cateory from "./pages/shop/category/Cateory";
 import FindFriend from "./pages/connect/find/FindFriend";
 import Info from "./pages/connect/user-info/UserInfo";
 import Bill from "./pages/shop/bills/Bill";
+import Connect from "./pages/connect/Connect";
 
 const styles = StyleSheet.create({
     container: {
@@ -49,9 +50,9 @@ function Body() {
                     <Route path="bill" element={<Bill />} />
                 </Route>
                 <Route path="/connect">
+                    <Route path="" element={<Connect />} />
                     <Route path="find" element={<FindFriend />} />
-                    <Route path=":userId/info" element={<Info />} />
-                    <Route path="settings" element={<Settings />} />
+                    <Route path="find/:userId/info" element={<Info />} />
                 </Route>
             </Routes>
         </View>

@@ -51,7 +51,7 @@ function Footer() {
                     <Text style={styles.titleTag}>Cửa hàng</Text>
                 </>
             </Link>
-            <Link to={"/"} style={styles.tag}>
+            <Link to={"/connect"} style={styles.tag}>
                 <>
                     <FontAwesome5 name="user-friends" size={20} color={"#685eb0"} style={{ marginBottom: 3 }}/>
                     <Text style={styles.titleTag}>Kết nối</Text>

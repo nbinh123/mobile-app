@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
 
 function User() {
 
-    const { userData } = useContext(GlobalContext)
+    const { userData, userDataCurrent } = useContext(GlobalContext)
     const TagConfig = ({ title, data }) => {
         return (
             <View style={styles.tagConfig}>
@@ -38,6 +38,7 @@ function User() {
             </View>
         )
     }
+    
 
     return (
         <View style={styles.container}>
