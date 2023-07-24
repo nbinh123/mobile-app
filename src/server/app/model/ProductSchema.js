@@ -11,6 +11,7 @@ const Product = new Schema({
     quanlity: {type: Number, default: 0},
     sold: Number,
     img: String,
+    remaining: {type: Number, default: 0},
     update: {type: Boolean, default: true},
     type: Array
 })

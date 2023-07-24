@@ -633,7 +633,7 @@ function pagination(arr, page) {
 
 class ShopController {
 
-
+    //  [GET]       /products/search
     search = (req, res, next) => {
 
         // chuyển đổi chuỗi thành một mảng nếu như chỉ truyền lên 1 type: type => [type]
@@ -672,9 +672,9 @@ class ShopController {
             // phân trang dựa theo page
             let data
             // nếu như có truyền query là page thì sẽ phân trang, còn không thì sẽ lấy tất cả
-            if(page){
+            if (page) {
                 data = pagination(filtedProducts, page)
-            }else{
+            } else {
                 data = filtedProducts
             }
             res.json({
@@ -691,11 +691,17 @@ class ShopController {
             })
             .catch(next)
     }
-
-    search_with_keyword = () => {
-        
+    //  [GET]       /products/find
+    search_with_keyword = async (req, res, next) => {
+        const { keyword } = req.query
+        const products = await ProductSchema.find({})
+        async function filterWithKeyword() {
+            const filteredProducts = products.filter(product => product.name.includes(keyword))
+            res.json(filteredProducts)
+        }
+        await filterWithKeyword()
     }
-
+    // [GET]        /products/read
     read = (req, res, next) => {
         const id = req.query.id
         ProductSchema.findById(id)
@@ -704,7 +710,7 @@ class ShopController {
                 status: 200
             }))
     }
-
+    //  [GET]       /products/get
     get = (req, res, next) => {
 
         const page = req.query.page
@@ -742,40 +748,50 @@ class ShopController {
         });
         res.json(arr)
     }
-    
+
     // router thực hiện <--CHỨC NĂNG SẮP XẾP--> dựa trên <--ĐỘ BÁN CHẠY--> của sản phẩm, chỉ có admin mới có thể dùng
-    arrange = (req, res, next) => {
+    //  [POST]      /products/arrange
+    arrange = async (req, res, next) => {
+        const products = await ProductSchema.find({})
+        async function arrangeProducts() {
+            const sortedProducts = products.sort((a, b) => b.sold - a.sold);
 
-        // sắp xếp lại các sản phẩm bằng số lượng đã bán ( sold ) theo chiều giảm dần 
-        function sortBySoldDescending(arr) {
-            return arr.sort((a, b) => b.sold - a.sold);
+            // In mảng sản phẩm mới đã được sắp xếp
+            res.json(sortedProducts);
         }
+        await arrangeProducts()
 
-        ProductSchema.find({})
-            .then(prod => {
-                // lọc sản phẩm
-                // xóa
-                const productCurrent = prod
-                ProductSchema.deleteMany({ update: true })
-                    .then(() => console.log("Đã xóa toàn bộ bản ghi trong database, chuẩn bị cập nhật sau 5 giây nữa"))
-                    .then(() => {
-                        const arrangedProducts = sortBySoldDescending(productCurrent)
-                        let arr = []
-
-                        arrangedProducts.forEach(element => {
-                            if (element.update === true) {
-                                arr.push(element)
-                                let newProd = new ProductSchema(element)
-                                newProd.save()
-                            }
-                        });
-                        res.json({
-                            message: "Cập nhật thành công",
-                            status: 200,
-                            data: arrangedProducts
-                        })
+    }
+    
+    update_quanlity = async (req, res, next) => {
+        const { idP, quanlity, type } = req.body
+        const product = await ProductSchema.findById(idP)
+        // cập nhật số lượng còn lại trong kho
+        async function update() {
+            if (type === "reset") {
+                product.remaining = Number(quanlity)
+                await product.save()
+                    .then((updatedProduct) => {
+                        res.json(updatedProduct)
                     })
-            })
+            }
+            if (type === "add") {
+                product.remaining = product.remaining + Number(quanlity)
+                await product.save()
+                    .then((updatedProduct) => {
+                        res.json(updatedProduct)
+                    })
+            } else {
+                res.status(400).json({
+                    message: "Có lỗi xảy ra",
+                    note: "Bạn chưa truyền tham số type. Type có thể là reset/add",
+                    status: 400
+                })
+            }
+        }
+        await update()
+
+
     }
 
 }

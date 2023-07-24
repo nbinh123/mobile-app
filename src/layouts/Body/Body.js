@@ -50,9 +50,12 @@ function Body() {
                     <Route path="bill" element={<Bill />} />
                 </Route>
                 <Route path="/connect">
+                    <Route path="find">
+                        <Route path="" element={<FindFriend />} />
+                        <Route path="settings" element={<Settings />} />
+                        <Route path=":userId/info" element={<Info />} />
+                    </Route>
                     <Route path="" element={<Connect />} />
-                    <Route path="find" element={<FindFriend />} />
-                    <Route path="find/:userId/info" element={<Info />} />
                 </Route>
             </Routes>
         </View>

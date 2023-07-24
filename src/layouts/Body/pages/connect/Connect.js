@@ -18,7 +18,7 @@ function Connect() {
     const navigate = useNavigate()
 
     const navigateToFindFriend = () => {
-        navigate(`find`)
+        navigate("find")
     }
     return (
         <View style={styles.container}>

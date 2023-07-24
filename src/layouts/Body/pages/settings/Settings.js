@@ -1,36 +1,49 @@
-import { memo, useContext, useRef, useState, memo } from "react";
+import { memo, useContext, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import GlobalContext from "../../../../hooks/useGlobalContext/GlobalContext";
 import Button from "../../../../components/Button/Button";
 import Title from "../../../../components/Title/Title";
+import putAPI from "../../../../server/axios/putAPI";
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center"
+        justifyContent: "center"
     },
     configButton: {
-        position: "relative",
-        height: "100%",
-        aspectRatio: 1 / 1,
-        flexDirection: "row"
+        flexDirection: "row",
+        width: "100%",
+        height: 48,
+        borderWidth: 0.5,
+        borderColor: "#c4c4fa",
+        alignItems: "center",
+        paddingHorizontal: 13,
+        marginVertical: 5,
+        borderRadius: 5
+    },
+    nameKey: {
+       width: "70%"
     },
     mode: {
-        position: "absolute",
-        width: "100%"
+        height: "60%",
+        width: "22%",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 50
     },
     left: {
         alignItems: "flex-start",
+        backgroundColor: "grey"
     },
     right: {
-        alignItems: "flex-end"
+        alignItems: "flex-end",
+        backgroundColor: "lightgreen"
     }
 })
 
 function Settings() {
 
-    const { userData } = useContext(GlobalContext)
+    const { userData, IP } = useContext(GlobalContext)
     const configList = useRef([
         {
             nameKey: 1,
@@ -51,38 +64,41 @@ function Settings() {
     const ConfigTag = memo(({ id, isTrue, nameKey }) => {
 
         const [on, setOn] = useState(isTrue)
-
-        const onCheckNameKey = () => {
-            let nameKey = ''
-            switch (id) {
-                case 1:
-                    return "Chia sẻ vị trí với mọi người"
-                    break;
-                case 2:
-                    return "Nhận tin nhắn từ người lạ"
-                    break;
-                case 3:
-                    return "Nhận thông báo ưu đãi"
-                    break;
-                default:
-                    break;
-            }
-        }
+        const isSelected = (on ? styles.selected : styles.noSelected)
 
         const check = (isTrue === true ? styles.right : styles.left)
-        const toogle = () => {
+        const toogle = async () => {
             setOn(!on)
+            // gọi API mỗi khi thay đổi setting
+            await putAPI(`http://${IP}:5000/api/user/config/update`, {
+                id: userData._id,
+                which: Number(id),
+                boo: (!on === true ? 1 : 0)
+            }, async (data) => {
+                console.log(data.config)
+            })
         }
+        useEffect(() => {
+            console.log(on + "  " + nameKey);
+        },[[on]])
 
         return (
-            <View style={[styles.configButton, styles.publicPhone]}>
+            <View style={[styles.configButton]}>
                 <View style={styles.nameKey}>
-                    <Text>{nameKey}</Text>
+                    <Text style={{ color: "white"}}>{nameKey}</Text>
                 </View>
-                <View style={[styles.mode, on]}>
+                <View style={[styles.mode, check]}>
                     <Button
                         title={""}
                         onClicked={toogle}
+                        width={100}
+                        height={100}
+                        
+                        justifyContent="center"
+                        paddingHorizontal={13}
+                        borderWidth={0}
+                        borderRadius={50}
+                        marginRight={3}
                     />
                 </View>
             </View>
@@ -94,7 +110,8 @@ function Settings() {
     return (
         <View style={styles.container}>
             <Title
-                title={"Cài đặt"}
+                title={"Cài đặt kết nối"}
+                marginBottom={13}
             />
             <View style={styles.config}>
                 <View style={styles.public}>

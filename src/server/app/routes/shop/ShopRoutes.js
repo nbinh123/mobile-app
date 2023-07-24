@@ -5,8 +5,10 @@ const ShopController = require("../../controllers/ShopControllers")
 
 router.get('/products/get', ShopController.get)
 router.get('/products/search', ShopController.search)
-router.get('/products/arrange', ShopController.arrange)
-router.get('/products/:id/read', ShopController.read)
+router.get('/products/find', ShopController.search_with_keyword)
+router.post('/products/arrange', ShopController.arrange)
+router.get('/products/read', ShopController.read)
+router.put('/products/update/quanlity', ShopController.update_quanlity)
 router.get('/', ShopController.test)
 
 module.exports = router

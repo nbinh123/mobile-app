@@ -86,7 +86,7 @@ class UserController {
                 status: 200
             }))
     }
-    // [PUT]        /config
+    // [PUT]        /config/update
     config = async (req, res, next) => {
 
         let updateKey = ""

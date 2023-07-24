@@ -48,7 +48,7 @@ function FindFriend() {
         }
     }
     const navigateToUserSettings = () => {
-        navigate("/settings")
+        navigate("settings")
     }
 
     return (
