@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
 function Login() {
 
 
-    const { setIsLogined, IP, setUserData, userDataCurrent } = useContext(GlobalContext)
+    const { setIsLogined, IP, setUserData, userDataCurrent, setIsAdmin } = useContext(GlobalContext)
     const [nickname, setNickname] = useState("")
     const [password, setPassword] = useState("")
     const [info, setInfo] = useState({
@@ -85,10 +85,14 @@ function Login() {
                     id: id
                 }, () => { },
                     async (response) => {
-                        setIsLogined(true)
+                        if (response.data.administration === true) {
+                            await setIsAdmin(true)
+                        }
+                        await setIsLogined(true)
                         // console.log(response)
-                        setUserData(response.data)
+                        await setUserData(response.data)
                         userDataCurrent.current = response.data
+
                     })
             }
         }

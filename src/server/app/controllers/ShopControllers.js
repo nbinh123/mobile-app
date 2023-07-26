@@ -1,9 +1,11 @@
 const express = require("express") // dùng thư viện express
 const app = express()
 const ProductSchema = require("../model/ProductSchema")
+const ShippingOrderSchema = require("../model/ShippingOrder")
+const UserSchema = require("../model/UserSchema")
 
 const axios = require("axios")
-const IP = "192.168.1.2"
+const IP = "192.168.1.62"
 
 const products = [
     {
@@ -735,23 +737,9 @@ class ShopController {
                 next()
             })
     }
-
-    test = (req, res, next) => {
-        let arr = []
-        products.forEach(element => {
-            if (element.type !== "") {
-
-                arr.push(element)
-                let newProd = new ProductSchema(element)
-                newProd.save()
-            }
-        });
-        res.json(arr)
-    }
-
-    // router thực hiện <--CHỨC NĂNG SẮP XẾP--> dựa trên <--ĐỘ BÁN CHẠY--> của sản phẩm, chỉ có admin mới có thể dùng
     //  [POST]      /products/arrange
     arrange = async (req, res, next) => {
+        // router thực hiện <--CHỨC NĂNG SẮP XẾP--> dựa trên <--ĐỘ BÁN CHẠY--> của sản phẩm, chỉ có admin mới có thể dùng
         const products = await ProductSchema.find({})
         async function arrangeProducts() {
             const sortedProducts = products.sort((a, b) => b.sold - a.sold);
@@ -762,7 +750,7 @@ class ShopController {
         await arrangeProducts()
 
     }
-    
+    //  [PUT]       /products/update/quanlity
     update_quanlity = async (req, res, next) => {
         const { idP, quanlity, type } = req.body
         const product = await ProductSchema.findById(idP)
@@ -793,8 +781,28 @@ class ShopController {
 
 
     }
-
+    //  [GET]       /shipping/orders
+    get_shipping_orders = async (req, res, next) => {
+        const all = await ShippingOrderSchema.find({})
+        res.json(all)
+    }
+    //  [GET]       /shipping/status
+    status_shipping_order = async (req, res, next) => {
+        // API này kiểm tra trạng thái đơn hàng và xem thông tin về đơn hàng
+        const { idShip } = req.query
+        const order = await ShippingOrderSchema.findById(idShip)
+        const userName = await UserSchema.findById(order?.receiver, 'name')
+        res.json({
+            status: order.status ? "Đã giao" : "Chưa được giao",
+            deliver: order.deliver,
+            receiver: userName.name,
+            type: order.type, 
+            total: order.total,
+            order: order.order,
+        }) 
+    }
 }
+
 
 module.exports = new ShopController;
 // chỉnh sửa ở 686

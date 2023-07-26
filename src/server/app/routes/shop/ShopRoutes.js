@@ -9,6 +9,7 @@ router.get('/products/find', ShopController.search_with_keyword)
 router.post('/products/arrange', ShopController.arrange)
 router.get('/products/read', ShopController.read)
 router.put('/products/update/quanlity', ShopController.update_quanlity)
-router.get('/', ShopController.test)
+router.get('/shipping/order', ShopController.get_shipping_orders)
+router.get('/shipping/status', ShopController.status_shipping_order)
 
 module.exports = router

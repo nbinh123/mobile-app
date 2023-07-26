@@ -91,7 +91,7 @@ function ReadConfession() {
     const navigate = useNavigate()
 
     const { id } = useParams()
-    const { IP } = useContext(GlobalContext)
+    const { IP, userData } = useContext(GlobalContext)
     const [info, setInfo] = useState(null)
 
     useEffect(() => {
@@ -143,7 +143,7 @@ function ReadConfession() {
 
     return (
         <View style={styles.container}>
-            <ButtonIcons backgroundColor={"#ff597b"} icon={<FontAwesome5 name="trash" size={28} color={"#c4c4ff"}/>} handleClick={onDeleteConfession}/>
+            {userData.administration ? (<ButtonIcons backgroundColor={"#ff597b"} icon={<FontAwesome5 name="trash" size={28} color={"#c4c4ff"}/>} handleClick={onDeleteConfession}/>) : ""}
             <Main />
         </View>
     );

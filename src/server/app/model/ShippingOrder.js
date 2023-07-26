@@ -10,6 +10,7 @@ const ShippingOrder = new Schema({
     deadLine: { type: String, default: ""},
     type: { type: String, default: "normal"},
     total: { type: Number, default: 0},
+    status: { type: Boolean, default: false },
     order: []
 })
 

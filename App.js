@@ -26,12 +26,13 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
 });
-const IP = "192.168.1.7" 
+const IP = "192.168.1.7"
 const socket = io.connect(`http://${IP}:5000`)
 
 export default function App() {
   const [isLogined, setIsLogined] = useState(false)
   const [userData, setUserData] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const userDataCurrent = useRef(null)
 
@@ -53,7 +54,7 @@ export default function App() {
   }
   useEffect(() => {
     userDataCurrent.current = userData
-  },[userData])
+  }, [userData])
 
 
   // theo dõi quá trình đăng nhập của user để lấy dữ liệu
@@ -61,12 +62,18 @@ export default function App() {
 
   return (
     <GlobalContext.Provider value={{
-      setIsLogined, IP, socket, setUserData, userData, userDataCurrent
+      setIsLogined,
+      IP,
+      socket,
+      setUserData,
+      userData,
+      userDataCurrent,
+      isAdmin,
+      setIsAdmin
     }}>
       <ImageBackground
         source={{ uri: "https://topshare.vn/wp-content/uploads/2021/10/hinh-nen-mau-tim-cute-1-569x1024.gif" }}
         style={[styles.container, { backgroundColor: `rgba(0, 0, 0, 0.1)` }]}>
-        {/* <Modal title={titleModal} content={contentModal} onShow={showModal} onHide={handleHideModal} onOK={useCallback(onOk)} /> */}
         <NativeRouter>
           {isLogined ? <Main /> : <Authentication />}
         </NativeRouter>

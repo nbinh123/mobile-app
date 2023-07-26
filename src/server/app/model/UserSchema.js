@@ -14,6 +14,7 @@ const User = new Schema({
     birth: String,
     email: String,
     phone: String,
+    administration: { type: Boolean, default: false},
     address: { type: String, default: null },
     credit_card: String,
     nickname: String,
@@ -74,7 +75,7 @@ const User = new Schema({
                 },
             }
         }
-    }
+    },
 })
 
 module.exports = mongoose.model('User', User, "user")

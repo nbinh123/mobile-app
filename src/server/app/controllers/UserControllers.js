@@ -127,31 +127,25 @@ class UserController {
         )
             .then(data => res.json(data))
     }
+    // [PUT]        /info/update
     update_infomations = async (req, res, next) => {
         const { id, which } = req.body
-        // let which = [
-        //     {
+        // let which = {
         //         nameKey: "name",
         //         value: "Bình"
-        //     }, {
-        //         nameKey: "phone",
-        //         value: "0123456789"
         //     }
-        // ]
+        // 
         // lấy ra thông tin hiện tại
         const infoCurrent = await UserSchema.findById(id)
 
         // nếu như trong which có trường nào thì sẽ update trường đó
-        async function filter() {
-            which.forEach(keys => {
-                if (infoCurrent[keys.nameKey] !== keys.value) {
-                    infoCurrent[keys.nameKey] = keys.value
-                    // console.log(infoCurrent[keys.nameKey])
-                }
-            })
+        async function filter(which) {
+            if(which.value !== infoCurrent[which.nameKey]){
+                infoCurrent[which.nameKey] = which.value
+            }
         }
         // chạy hàm update
-        await filter()
+        await filter(which)
         // bắt đầu lưu lại bản ghi và trả về bản ghi mới
         await infoCurrent.save()
             .then((updatedInfomations) => {
@@ -370,7 +364,7 @@ class UserController {
                     receiver: id,
                     type: "normal",
                     total: userData.cart.payment.total,
-                    order: [...userData.cart.order``]
+                    order: [...userData.cart.order]
                 })
                 await newOrder.save()
                     .then((data) => res.status(200).json(data))
