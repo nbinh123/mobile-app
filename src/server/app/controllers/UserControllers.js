@@ -129,23 +129,19 @@ class UserController {
     }
     // [PUT]        /info/update
     update_infomations = async (req, res, next) => {
-        const { id, which } = req.body
-        // let which = {
-        //         nameKey: "name",
-        //         value: "Bình"
-        //     }
-        // 
-        // lấy ra thông tin hiện tại
+        const { id, nameKey, value } = req.body
+        // nameKey là trường cần update
+        // value là dữ liệu update
         const infoCurrent = await UserSchema.findById(id)
 
         // nếu như trong which có trường nào thì sẽ update trường đó
-        async function filter(which) {
-            if(which.value !== infoCurrent[which.nameKey]){
-                infoCurrent[which.nameKey] = which.value
+        async function filter() {
+            if(value !== infoCurrent[nameKey]){
+                infoCurrent[nameKey] = value
             }
         }
         // chạy hàm update
-        await filter(which)
+        await filter()
         // bắt đầu lưu lại bản ghi và trả về bản ghi mới
         await infoCurrent.save()
             .then((updatedInfomations) => {

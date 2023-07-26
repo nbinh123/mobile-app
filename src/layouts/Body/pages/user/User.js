@@ -50,10 +50,8 @@ function User() {
                 // gọi API ở đây
                 putAPI(`http://${IP}:5000/api/user/info/update`, {
                     id: userData._id,
-                    which: {
-                        nameKey: nameKey,
-                        value: newValue
-                    }
+                    nameKey: nameKey,
+                    value: newValue
                 })
             },2000)
             setTimer(newTimer)
