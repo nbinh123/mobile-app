@@ -1,7 +1,9 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Link } from "react-router-native"
-import Button from "../../../../components/Button/Button";
 import { useContext, useState } from "react";
+import * as Location from "expo-location"
+
+import Button from "../../../../components/Button/Button";
 import GlobalContext from "../../../../hooks/useGlobalContext/GlobalContext";
 import postAPI from "../../../../server/axios/postAPI";
 import getAPI from "../../../../server/axios/getAPI";
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
 function Login() {
 
 
-    const { setIsLogined, IP, setUserData, userDataCurrent, setIsAdmin } = useContext(GlobalContext)
+    const { setIsLogined, IP, setUserData, setIsAdmin, setLongitude, setLatitude, socket } = useContext(GlobalContext)
     const [nickname, setNickname] = useState("")
     const [password, setPassword] = useState("")
     const [info, setInfo] = useState({
@@ -76,10 +78,49 @@ function Login() {
         status: 400
     })
 
+    // useEffect này để xác thực người dùng cấp quyền truy cập
+    // và lấy ra kinh độ và vĩ độ của người dùng
+    const getCurrentLocation = async (id, name) => {
+        try {
+            const { coords } = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = coords;
+
+            setLongitude(longitude)
+            setLatitude(latitude)
+            socket.emit("Client-request-strangers-location-first", {
+                name: await name,
+                myId: await id,
+                mySocketId: socket.id,
+                myLong: longitude,
+                myLat: latitude,
+                radius: 180, //(m)
+                quantity: 5,
+            })
+
+            // Tiếp tục xử lý với thông tin kinh độ và vĩ độ
+        } catch (error) {
+            console.log('Không thể lấy thông tin vị trí:', error);
+        }
+    };
+    // yêu cầu quyền truy cập vị trí để lấy vị trí
+
+    async function connect(id, name) {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            console.log('Quyền truy cập vị trí bị từ chối!');
+            return;
+        } else {
+            await getCurrentLocation(id, name)
+        }
+    }
+
+
+    // Tiếp tục xử lý với quyền truy cập vị trí được cấp
+
     const submit = async () => {
 
         console.log("đăng nhập")
-        async function log(id, status) {
+        async function log(id, status, name) {
             if (status === 200) {
                 await getAPI(`http://${IP}:5000/api/user/get`, {
                     id: id
@@ -91,8 +132,9 @@ function Login() {
                         await setIsLogined(true)
                         // console.log(response)
                         await setUserData(response.data)
-                        userDataCurrent.current = response.data
-
+                        // if(await response.data.config.onShareLocation){
+                        await connect(id, name)
+                        // }
                     })
             }
         }
@@ -100,7 +142,7 @@ function Login() {
             nickname: nickname,
             password: password
         }, async (data) => {
-            await log(data.data[0]._id, data.status)
+            await log(data.data[0]._id, data.status, data.data[0].name)
         })
 
 

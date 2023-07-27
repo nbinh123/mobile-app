@@ -3,7 +3,6 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { ImageBackground, StyleSheet, View, KeyboardAvoidingView } from 'react-native';
 import { NativeRouter, Routes, Route } from 'react-router-native';
 import io from "socket.io-client";
-import * as Location from "expo-location"
 
 import GlobalContext from './src/hooks/useGlobalContext/GlobalContext';
 import Body from './src/layouts/Body/Body';
@@ -24,7 +23,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
 });
-const IP = "192.168.1.49"
+const IP = "192.168.1.51"
 const socket = io.connect(`http://${IP}:5000`)
 
 export default function App() {
@@ -59,34 +58,8 @@ export default function App() {
   //   userDataCurrent.current = userData
   // }, [userData])
 
-  useEffect(async () => {
-    const getCurrentLocation = async () => {
-      try {
-        const { coords } = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = coords;
 
-        console.log('Kinh độ:', longitude);
-        setLongitude(longitude)
-        console.log('Vĩ độ:', latitude);
-        setLatitude(latitude)
-
-        // Tiếp tục xử lý với thông tin kinh độ và vĩ độ
-      } catch (error) {
-        console.log('Không thể lấy thông tin vị trí:', error);
-      }
-    };
-    // yêu cầu quyền truy cập vị trí để lấy vị tr
-
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('Quyền truy cập vị trí bị từ chối!');
-      return;
-    } else {
-      await getCurrentLocation()
-    }
-
-    // Tiếp tục xử lý với quyền truy cập vị trí được cấp
-  }, [])
+  // gửi 1 thông điệp lên server để chia sẻ cho các user khác
 
 
   // theo dõi quá trình đăng nhập của user để lấy dữ liệu
@@ -103,7 +76,9 @@ export default function App() {
       isAdmin,        // kiểm tra xem tài khoản đó có phải tài khoản admin không
       setIsAdmin,     // thiết lập tài khoản admin
       longitude,      // kinh độ của thiết bị 
-      latitude        // vĩ độ của thiết bị
+      latitude,       // vĩ độ của thiết bị
+      setLongitude,   // cập nhật kinh độ người dùng
+      setLatitude,    // cập nhật vĩ độ người dùng
     }}>
       <ImageBackground
         source={{ uri: "https://topshare.vn/wp-content/uploads/2021/10/hinh-nen-mau-tim-cute-1-569x1024.gif" }}

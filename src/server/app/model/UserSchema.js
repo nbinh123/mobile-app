@@ -76,6 +76,7 @@ const User = new Schema({
             }
         }
     },
+    friends: {type: Array, defaul: []}
 })
 
 module.exports = mongoose.model('User', User, "user")

@@ -71,7 +71,7 @@ route(app)
 
 
 
-const IP = "192.168.1.49"
+const IP = "192.168.1.51"
 const { Server } = require("socket.io")
 const io = new Server(server, {
     // Cấu hình socket.io sử dụng đường dẫn /socket.io
@@ -94,8 +94,29 @@ const sharedLocationMembers = [
     {
         name: 'Admin',
         lat: 16.064742,
-        long: 108.205518
-    },// ...........
+        long: 108.205518,
+        id: 1
+    }, {
+        name: "A",
+        lat: 16.062470,
+        long: 108.211136,
+        id: 2,
+    }, {
+        name: "B",
+        lat: 16.060911,
+        long: 108.211376,
+        id: 3
+    }, {
+        name: "C",
+        lat: 16.062556,
+        long: 108.207160,
+        id: 4
+    }, {
+        name: "D",
+        lat: 16.064742,
+        long: 108.205518,
+        id: 5
+    }
 ]
 io.on('connection', (socket) => {
     let distance = 0, windy = 0, height = 0, windyWay = "forward", differenceHeight = "more", angle, force, totalPart = 0
@@ -397,62 +418,57 @@ io.on('connection', (socket) => {
 
 
 
-    // chức năng chia sẻ vị trí
-    socket.on("Client-request-strangers-location", (request) => {
-        
+    let strangersLocation = []
+    // chức năng chia sẻ vị trí cho tất cả người lạ
+    // gửi dữ liệu lần đầu để lưu lại
+    socket.on("Client-request-strangers-location-first", (request) => {
 
-        // request = {
-        // myLat: ...
-        // myLong: ...
-        // }
         const { myLat, myLong, radius, quantity, myId } = request
-
+        console.log(request)
+        // let primaryArr = [...sharedLocationMembers]  
         // mảng này sẽ trả cho người dùng
-        let strangersLocation = []
         // vĩ độ: lat
         // kinh độ: long
-        async function calculateDistance(lat1, lon1, lat2, lon2) {
-            function degreesToRadians(degrees) {
-                return (degrees * Math.PI) / 180;
-            }
-            const earthRadius = 6371; // Đường kính Trái Đất (đơn vị: km)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const earthRadius = 6371; // Đường kính trái đất (đơn vị: km)
 
-            const dLat = degreesToRadians(lat2 - lat1);
-            const dLon = degreesToRadians(lon2 - lon1);
+            const toRadian = (angle) => (Math.PI / 180) * angle;
+
+            const dLat = toRadian(lat2 - lat1);
+            const dLon = toRadian(lon2 - lon1);
 
             const a =
                 Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(degreesToRadians(lat1)) *
-                Math.cos(degreesToRadians(lat2)) *
+                Math.cos(toRadian(lat1)) *
+                Math.cos(toRadian(lat2)) *
                 Math.sin(dLon / 2) *
                 Math.sin(dLon / 2);
 
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
             const distance = earthRadius * c;
-            return distance;
+            return distance
         }
-        // xử lý số liệu
-        sharedLocationMembers.forEach(async user => {
-            const distance = await calculateDistance(myLat, myLong, user.lat, user.long)
-            if (distance <= radius / 1000 /* (m) -> (km) */  && user?.id !== myId) {
-                user.distance = `${(distance * 1000).toFixed(2)}m`
+        // xử lý số liệu 
+        sharedLocationMembers.forEach((user, index) => {
+            
+            const distance = calculateDistance(Number(user.lat), Number(user.long), Number(myLat), Number(myLong))
+            console.log(myLat)
+            console.log(myLong)
+            if (distance <= 999999 && user.id !== myId) {
                 if (strangersLocation.length <= quantity) {
                     strangersLocation.push(user)
+                    strangersLocation[index].distance = (distance * 1000).toFixed(2)
                 }
+            } else {
+                strangersLocation.push((distance*1000).toFixed(2))
             }
         })
         // gửi về lại cho client
-        socket.send("Server-send-strangers-around", strangersLocation)
-        // Sử dụng ví dụ vĩ độ và kinh độ của hai người dùng
-        // const user1Lat = 37.7749; // Vĩ độ người dùng 1
-        // const user1Lon = -122.4194; // Kinh độ người dùng 1
-        // const user2Lat = 34.0522; // Vĩ độ người dùng 2
-        // const user2Lon = -118.2437; // Kinh độ người dùng 2
-
-        // const distance = calculateDistance(user1Lat, user1Lon, user2Lat, user2Lon);
-        // console.log('Khoảng cách giữa hai người dùng:', distance.toFixed(2), 'km');
-
+        console.log(strangersLocation)
+    })
+    socket.on("Client-request-strangers-location", () => {
+        socket.emit("Server-send-strangers-around", strangersLocation)
     })
 });
 

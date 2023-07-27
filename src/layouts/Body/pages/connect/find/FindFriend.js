@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useNavigate } from "react-router-native"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
 function FindFriend() {
 
     const { longitude, latitude, userData, socket } = useContext(GlobalContext)
+    const timerRef = useRef(0)
     const [strangerList, setStrangerList] = useState([{
         name: "",
         _id: "",
@@ -30,19 +31,14 @@ function FindFriend() {
     // state ẩn hiện button show ra người dùng ở gần
     const [show, setShow] = useState(false)
     const navigate = useNavigate()
-
     useEffect(() => {
-        socket.emit("Client-request-strangers-location", {
-            myLong: longitude,
-            myLat: latitude,
-            radius: 180, //(m)
-            quantity: 5,
-            myId: userData._id
-        })
-    }, [])
+        socket.emit("Client-request-strangers-location")
+    },[])
+
     useEffect(() => {
         socket.on("Server-send-strangers-around", (arrStrangers) => {
             setStrangerList(arrStrangers)
+            console.log(arrStrangers)
         })
     })
 
