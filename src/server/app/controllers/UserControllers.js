@@ -89,6 +89,12 @@ class UserController {
     // [PUT]        /config/update
     config = async (req, res, next) => {
 
+        const { id, which, boo } = req.body
+        // id: string,
+        // which: number,
+        // boo: number: 0/1
+        // 0 là false
+        // 1 là true
         let updateKey = ""
         async function returnConfig(which, boolean) {
 
@@ -109,8 +115,6 @@ class UserController {
             return updateKey
         }
 
-
-        const { id, which, boo } = req.body
         await returnConfig(Number(which))
             .then(upKey => updateKey = upKey)
 

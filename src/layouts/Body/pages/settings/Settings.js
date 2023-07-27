@@ -64,7 +64,7 @@ function Settings() {
     const ConfigTag = memo(({ id, isTrue, nameKey }) => {
 
         const [on, setOn] = useState(isTrue)
-        const isSelected = (on ? styles.selected : styles.noSelected)
+        const isSelected = (on ? "flex-start" : "flex-end")
 
         const check = (isTrue === true ? styles.right : styles.left)
         const toogle = async () => {
@@ -73,7 +73,7 @@ function Settings() {
             await putAPI(`http://${IP}:5000/api/user/config/update`, {
                 id: userData._id,
                 which: Number(id),
-                boo: (!on === true ? 1 : 0)
+                boo: (on === true ? 0 : 1)
             }, async (data) => {
                 console.log(data.config)
             })
@@ -92,9 +92,8 @@ function Settings() {
                         title={""}
                         onClicked={toogle}
                         width={100}
-                        height={100}
-                        
-                        justifyContent="center"
+                        height={100}                        
+                        justifyContent={isSelected}
                         paddingHorizontal={13}
                         borderWidth={0}
                         borderRadius={50}

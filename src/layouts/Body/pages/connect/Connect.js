@@ -4,6 +4,8 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 
 import Title from "../../../../components/Title/Title";
 import ButtonIcons from "../../../../components/Button/ButtonIcons/ButtonIcons";
+import { useContext, useEffect } from "react";
+import GlobalContext from "../../../../hooks/useGlobalContext/GlobalContext";
 
 const styles = StyleSheet.create({
     container: {

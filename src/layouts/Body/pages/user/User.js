@@ -1,9 +1,12 @@
-import { useContext, useRef, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native"
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity } from "react-native";
+import AntDesign from "react-native-vector-icons/AntDesign"
+
 import GlobalContext from "../../../../hooks/useGlobalContext/GlobalContext";
 import Title from "../../../../components/Title/Title";
 import Button from "../../../../components/Button/Button";
 import putAPI from "../../../../server/axios/putAPI";
+import getAPI from "../../../../server/axios/getAPI";
 
 const styles = StyleSheet.create({
     container: {
@@ -25,49 +28,112 @@ const styles = StyleSheet.create({
         fontWeight: 400
     },
     configs: {
-
+        width: "100%",
+        alignItems: "center"
+    },
+    tagConfig: {
+        position: "relative",
+        paddingVertical: 22,
+        // marginVertical: 13,
+        flexDirection: "row",
+        width: "90%",
+        borderBottomWidth: 0.5,
+        borderColor: "#c4c4fa",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    titleConfig: {
+        flex: 3,
+        borderBottomWidth: 0.5,
+        borderColor: "#c4c4fa",
+        color: "#c4c4ba"
+    },
+    submitIcon: {
+        position: "absolute",
+        right: "5%",
+        aspectRatio: 1,
+        borderRadius: 50,
+        borderWidth: 0.5,
+        padding: 4,
     }
 })
 
 
 function User() {
 
-    const { userData, IP } = useContext(GlobalContext)
+    const { userData, IP, setUserData } = useContext(GlobalContext)
+    const [data, setData] = useState(null)
+    useEffect(() => {
+        getAPI(`http://${IP}:5000/api/user/get`, {
+            id: userData._id
+        }, null, async (userData) => {
+            setData(userData.data)
+        })
+    }, [])
 
 
 
-    const TagConfig = ({ title, data, nameKey }) => {
+    const TagConfig = memo(({ title, data, nameKey }) => {
 
         const [newValue, setNewValue] = useState(data)
-        const [timer, setTimer] = useState(null)
+        const [primaryValue, setPrimaryValue] = useState(data)
+        const inpRef = useRef()
+
         const update = (text) => {
             setNewValue(text)
             // kỹ thuật debounce
-            if(timer){
-                clearTimeout(timer)
-            }
-            const newTimer = setTimeout(() => {
-                // gọi API ở đây
-                putAPI(`http://${IP}:5000/api/user/info/update`, {
-                    id: userData._id,
-                    nameKey: nameKey,
-                    value: newValue
-                })
-            },2000)
-            setTimer(newTimer)
+        }
+        const onUpdateOnDatabase = async (e) => {
+            // lấy ra giá trị của input
+            // gọi API ở đây
+            await putAPI(`http://${IP}:5000/api/user/info/update`, {
+                id: userData._id,
+                nameKey: nameKey,
+                value: newValue
+            })
+            await getAPI(`http://${IP}:5000/api/user/get`, {
+                id: userData._id
+            }, null, async (userData) => {
+                setNewValue(userData.data[nameKey])
+                setPrimaryValue(userData.data[nameKey])
+            })
+            inpRef.current.blur()
         }
 
         return (
             <View style={styles.tagConfig}>
-                <Text>{title}</Text>
-                <TextInput onChangeText={(text) => update(text)} style={styles.titleConfig} value={newValue}></TextInput>
+                <Text style={{
+                    color: "white",
+                    flex: 1,
+                    paddingLeft: 18
+                }}>{title}
+                </Text>
+                {nameKey !== "_id" ? (
+                    <>
+                        <TextInput
+                            ref={inpRef}
+                            onChangeText={(text) => update(text)}
+                            style={styles.titleConfig}
+                            value={newValue}>
+                        </TextInput>
+                        {newValue !== primaryValue ? (
+                            <TouchableOpacity onPress={onUpdateOnDatabase} style={styles.submitIcon}>
+                                <AntDesign name="check" size={18} color={"white"} />
+                            </TouchableOpacity>
+                        ) : ""}
+                    </>
+                ) : (
+                    <Text style={styles.titleConfig} value={newValue}>
+                        {newValue}
+                    </Text>
+                )}
             </View>
         )
-    }
+    })
 
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Title
                 title={"Người dùng"}
             />
@@ -78,52 +144,52 @@ function User() {
                 <View style={styles.configs}>
                     <TagConfig
                         title={"ID: "}
-                        data={userData._id}
+                        data={data?._id}
                         nameKey={"_id"}
                     />
                     <TagConfig
                         title={"Tên: "}
-                        data={userData.name}
+                        data={data?.name}
                         nameKey={"name"}
                     />
                     <TagConfig
                         title={"Địa chỉ: "}
-                        data={userData.address}
+                        data={data?.address}
                         nameKey={"address"}
                     />
                     <TagConfig
                         title={"Sinh nhật: "}
-                        data={userData.birth}
+                        data={data?.birth}
                         nameKey={"birth"}
                     />
                     <TagConfig
                         title={"Thẻ tín dụng: "}
-                        data={userData.credit_cart}
+                        data={data?.credit_cart}
                         nameKey={"credit_cart"}
                     />
                     <TagConfig
                         title={"Email: "}
-                        data={userData.email}
+                        data={data?.email}
                         nameKey={"email"}
                     />
                     <TagConfig
                         title={"Nickname: "}
-                        data={userData.nickname}
+                        data={data?.nickname}
                         nameKey={"nickname"}
                     />
                     <TagConfig
                         title={"SĐT: "}
-                        data={userData.phone}
+                        data={data?.phone}
                         nameKey={"phone"}
                     />
                     <TagConfig
                         title={"Giới tính: "}
-                        data={userData.sex}
+                        data={data?.sex}
                         nameKey={"sex"}
                     />
                 </View>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
