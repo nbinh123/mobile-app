@@ -17,6 +17,7 @@ import FindFriend from "./pages/connect/find/FindFriend";
 import Info from "./pages/connect/user-info/UserInfo";
 import Bill from "./pages/shop/bills/Bill";
 import Connect from "./pages/connect/Connect";
+import Nofication from "./pages/nofication/Nofications";
 
 const styles = StyleSheet.create({
     container: {
@@ -56,6 +57,9 @@ function Body() {
                         <Route path=":userId/info" element={<Info />} />
                     </Route>
                     <Route path="" element={<Connect />} />
+                </Route>
+                <Route path="/nofications">
+                    <Route path="" element={<Nofication/>}/>
                 </Route>
             </Routes>
         </View>

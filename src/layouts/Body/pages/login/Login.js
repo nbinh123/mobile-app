@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
 function Login() {
 
 
-    const { setIsLogined, IP, setUserData, setIsAdmin, setLongitude, setLatitude, socket } = useContext(GlobalContext)
+    const { setIsLogined, IP, setUserData, setIsAdmin, setLongitude, setLatitude, socket, setStrangerList, strangerList } = useContext(GlobalContext)
     const [nickname, setNickname] = useState("")
     const [password, setPassword] = useState("")
     const [info, setInfo] = useState({
@@ -97,6 +97,15 @@ function Login() {
                 quantity: 5,
             })
 
+            socket.emit("Client-send-socket-info", {
+                id: await id,
+                socketId: socket.id
+            })
+            socket.emit("Client-request-strangers-location")
+            socket.on("Server-send-strangers-around", (arrStrangers) => {
+                setStrangerList(arrStrangers)
+                console.log(arrStrangers)
+            })
             // Tiếp tục xử lý với thông tin kinh độ và vĩ độ
         } catch (error) {
             console.log('Không thể lấy thông tin vị trí:', error);

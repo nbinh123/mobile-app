@@ -23,6 +23,9 @@ router.post('/coin/buy', LoginController.reward_exchange_by_coin)
 
 router.put('/config/update', LoginController.config)
 
+router.post('/friend/request', LoginController.request_friend)
+router.post('/friend/request/cancel', LoginController.cancel_request_friend)
+
 router.use('/', LoginController.index)
 
 

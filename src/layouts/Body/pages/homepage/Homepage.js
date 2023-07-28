@@ -8,8 +8,7 @@ const styles = StyleSheet.create({
 
 function Homepage() {
     return (
-        <View
-            style={styles.container}>
+        <View style={styles.container}>
             <Text>Homepage</Text>
         </View>
     );

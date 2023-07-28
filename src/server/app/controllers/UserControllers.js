@@ -140,7 +140,7 @@ class UserController {
 
         // nếu như trong which có trường nào thì sẽ update trường đó
         async function filter() {
-            if(value !== infoCurrent[nameKey]){
+            if (value !== infoCurrent[nameKey]) {
                 infoCurrent[nameKey] = value
             }
         }
@@ -477,6 +477,37 @@ class UserController {
                 }
             })
 
+    }
+    //  [POST]      /friend/request
+    request_friend = async (req, res, next) => {
+        // gửi lời mời kết bạn
+
+        const { myId, theirId } = req.body
+        UserSchema.findOneAndUpdate(
+            { _id: theirId },
+            {
+                $push: {
+                    waitingAddFriendResponse: myId
+                }
+            }, {
+            new: true
+        }
+        )
+            .then(updated => res.json(updated))
+    }
+    //  [POST]      /friend/request/cancel
+    cancel_request_friend = async (req, res, next) => {
+        const { myId, theirId } = req.body
+        UserSchema.findOneAndUpdate(
+            { _id: myId },
+            {
+                $pull: {
+                    waitingAddFriendResponse: theirId
+                }
+            }, {
+            new: true
+        })
+            .then(updated => res.json(updated))
     }
 }
 

@@ -6,9 +6,9 @@ async function postAPI(url, paramCondition, callback) {
             'Content-Type': 'application/json'
         }
     })
-        .then(response => {
+        .then(async response => {
             if (callback !== undefined) {
-                callback(response.data)
+                await callback(response.data)
             } else {
                 console.log("Dữ liệu được trả về: ")
                 console.log(response.data)

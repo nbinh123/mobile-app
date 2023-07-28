@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
 });
-const IP = "192.168.1.51"
-const socket = io.connect(`http://${IP}:5000`)
+const IP = "192.168.1.54"                           // địa chỉ IP của server, khi hosting chỉ cần thay đổi IP là tên mình đăng ký
+const socket = io.connect(`http://${IP}:5000`)      // kết nối với server socket
 
 export default function App() {
 
@@ -35,6 +35,7 @@ export default function App() {
   // state vị trí của người dùng
   const [longitude, setLongitude] = useState(null)
   const [latitude, setLatitude] = useState(null)
+  const [strangerList, setStrangerList] = useState([])
 
   const userDataCurrent = useRef(null)
 
@@ -54,16 +55,11 @@ export default function App() {
       </Routes>
     )
   }
-  // useEffect(() => {
-  //   userDataCurrent.current = userData
-  // }, [userData])
-
-
   // gửi 1 thông điệp lên server để chia sẻ cho các user khác
-
-
   // theo dõi quá trình đăng nhập của user để lấy dữ liệu
   // Component này kiểm tra xem người dùng đã đăng nhập hay chưa
+
+  // lắng nghe những lời mời kết bạn được gửi tới
 
   return (
     <GlobalContext.Provider value={{
@@ -79,6 +75,8 @@ export default function App() {
       latitude,       // vĩ độ của thiết bị
       setLongitude,   // cập nhật kinh độ người dùng
       setLatitude,    // cập nhật vĩ độ người dùng
+      strangerList,   // danh sách những người ở gần
+      setStrangerList,// cập nhập danh sách những người ở gần
     }}>
       <ImageBackground
         source={{ uri: "https://topshare.vn/wp-content/uploads/2021/10/hinh-nen-mau-tim-cute-1-569x1024.gif" }}

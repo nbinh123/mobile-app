@@ -76,7 +76,9 @@ const User = new Schema({
             }
         }
     },
-    friends: {type: Array, defaul: []}
+    friends: {type: Array, defaul: []},
+    nofications: {type: Array, default: []},
+    waitingAddFriendResponse: {type: Array, default: []}
 })
 
 module.exports = mongoose.model('User', User, "user")

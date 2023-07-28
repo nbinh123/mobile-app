@@ -71,7 +71,7 @@ route(app)
 
 
 
-const IP = "192.168.1.51"
+const IP = "192.168.1.54"
 const { Server } = require("socket.io")
 const io = new Server(server, {
     // Cấu hình socket.io sử dụng đường dẫn /socket.io
@@ -105,7 +105,7 @@ const sharedLocationMembers = [
         name: "B",
         lat: 16.060911,
         long: 108.211376,
-        id: 3
+        id: "64b396193eb4ec53323a3665"
     }, {
         name: "C",
         lat: 16.062556,
@@ -118,8 +118,15 @@ const sharedLocationMembers = [
         id: 5
     }
 ]
+// kiểm soát số người đang trực tuyến ( khác online_members )
+const onlineUsers = []
+
+
 io.on('connection', (socket) => {
     let distance = 0, windy = 0, height = 0, windyWay = "forward", differenceHeight = "more", angle, force, totalPart = 0
+    // khi người dùng đăng nhập thành công, server sẽ yêu cầu id và socket.id để lưu vào biến onlineUsers
+    socket.on("Client-send-socket-info", (data) => onlineUsers.push(data))
+
 
     let checkDistance = () => {
         // khoảng cách sẽ không phân biệt gió ngược hay thuận
@@ -239,7 +246,6 @@ io.on('connection', (socket) => {
             height = data.value
         }
     }
-    console.log(`${socket.id}   connected`);
     // lắng nghe sự kiện client disconnect server
     socket.on("disconnect", () => {
         console.log(`${socket.id}  disconnected`)
@@ -337,36 +343,6 @@ io.on('connection', (socket) => {
                 })
             })
     })
-    // PHẦN CODE DÀNH CHO CHAT REAL-TIME
-    socket.on("Client-request-online-members", () => {
-        io.sockets.emit("Server-send-online-members", online_members)
-    })
-    // lắng nghe sự kiện người dùng đăng xuất
-    socket.on("Client-request-logout", () => {
-        let index = online_members.findIndex((user) => {
-            return user.id === socket.id
-        })
-        online_members.splice(index, 1)
-        io.sockets.emit("Server-send-online-members", online_members)
-    })
-    // lắng nghe sự kiện người dùng gửi tin nhắn cho TẤT CẢ MỌI NGƯỜI
-    socket.on("Client-send-message-all", (data) => {
-        io.sockets.emit("Server-send-message", {
-            name: data.name,
-            img: data.img,
-            from: data.from,
-            message: data.message,
-        })
-    })
-    // lắng nghe người dùng gửi tin nhắn riêng tư cho ai đó
-    socket.on("Client-send-message-private", (data) => {
-        io.to(data.to).emit("Server-send-message", {
-            name: data.name,
-            img: data.img,
-            from: data.from,
-            message: data.message,
-        })
-    })
 
 
 
@@ -423,8 +399,14 @@ io.on('connection', (socket) => {
     // gửi dữ liệu lần đầu để lưu lại
     socket.on("Client-request-strangers-location-first", (request) => {
 
-        const { myLat, myLong, radius, quantity, myId } = request
-        console.log(request)
+        const { myLat, myLong, radius, quantity, myId, name } = request
+        // thêm vào mảng global để chia sẻ
+        sharedLocationMembers.push({
+            name: name,
+            lat: myLat,
+            long: myLong,
+            id: myId,
+        })
         // let primaryArr = [...sharedLocationMembers]  
         // mảng này sẽ trả cho người dùng
         // vĩ độ: lat
@@ -453,15 +435,13 @@ io.on('connection', (socket) => {
         sharedLocationMembers.forEach((user, index) => {
             
             const distance = calculateDistance(Number(user.lat), Number(user.long), Number(myLat), Number(myLong))
-            console.log(myLat)
-            console.log(myLong)
             if (distance <= 999999 && user.id !== myId) {
                 if (strangersLocation.length <= quantity) {
                     strangersLocation.push(user)
                     strangersLocation[index].distance = (distance * 1000).toFixed(2)
                 }
             } else {
-                strangersLocation.push((distance*1000).toFixed(2))
+                // strangersLocation.push((distance*1000).toFixed(2))
             }
         })
         // gửi về lại cho client
@@ -469,6 +449,57 @@ io.on('connection', (socket) => {
     })
     socket.on("Client-request-strangers-location", () => {
         socket.emit("Server-send-strangers-around", strangersLocation)
+    })
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // chức năng gửi lời mời kết bạn
+    socket.on("Client-send-request-friend", (id) => {
+        // tìm socketId của user đó trong danh sách những người đang online
+        const arr = onlineUsers.filter(user => user.id === id)
+        // nếu như không có thì trả về lỗi
+        if(arr.length === 0){
+            socket.emit("Server-send-status-request-friend", {
+                status: 400
+            })
+        }else{
+        // nếu có thì trả về socketId
+            socket.emit("Server-send-status-request-friend", {
+                status: 200,
+                socketID: arr[0].socketID
+            })
+        }
+    })
+    socket.on("Client-send-request-to-someone", (data) => {
+        io.to(data.theirId).emit("Someone-send-friend-request", {
+            id: data.fromId,
+            decription: `${data.name ? data.name : "Người dùng ẩn danh"} đã gửi cho bạn lời mời kết bạn`,
+            avatar: data.avatar,
+            date: Date.now()
+        })
     })
 });
 

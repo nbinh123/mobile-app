@@ -63,6 +63,12 @@ function Footer() {
                     <Text style={styles.titleTag}>Trò chơi</Text>
                 </>
             </Link>
+            <Link to={"/nofications"} style={styles.tag}>
+                <>
+                    <FontAwesome name="bell" size={20} color={"#685eb0"} style={{ marginBottom: 3 }} />
+                    <Text style={styles.titleTag}>Thông báo</Text>
+                </>
+            </Link>
             <Link to={"/user"} style={[styles.tag, styles.lastTag]}>
                 <>
                     <FontAwesome name="user" size={20} color={"#685eb0"} style={{ marginBottom: 3 }} />
