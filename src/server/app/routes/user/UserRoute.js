@@ -1,32 +1,34 @@
 const express = require("express")
 const router = express.Router()
 
-const LoginController = require("../../controllers/UserControllers")
+const UserController = require("../../controllers/UserControllers")
 
-router.post('/login', LoginController.login)
-router.post('/register', LoginController.register)
-router.get('/get', LoginController.get_infomation)
-router.put('/info/update', LoginController.update_infomations)
+router.post('/login', UserController.login)
+router.post('/register', UserController.register)
+router.get('/get', UserController.get_infomation)
+router.put('/info/update', UserController.update_infomations)
 
-router.put('/cart/pay', LoginController.request_bill)
+router.put('/cart/pay', UserController.request_bill)
 
-router.put('/cart/update/quanlity', LoginController.update_quanlity_order)
-router.put('/cart/update/create', LoginController.create_order)
-router.get('/cart/get', LoginController.get_card)
-router.delete('/cart/update/delete', LoginController.delete_order)
+router.put('/cart/update/quanlity', UserController.update_quanlity_order)
+router.put('/cart/update/create', UserController.create_order)
+router.get('/cart/get', UserController.get_card)
+router.delete('/cart/update/delete', UserController.delete_order)
 
-router.post('/cart/bill/pay', LoginController.pay)
+router.post('/cart/bill/pay', UserController.pay)
 
-router.get('/coin/get', LoginController.get_coin)
-router.put('/coin/update', LoginController.update_coin)
-router.post('/coin/buy', LoginController.reward_exchange_by_coin)
+router.get('/coin/get', UserController.get_coin)
+router.put('/coin/update', UserController.update_coin)
+router.post('/coin/buy', UserController.reward_exchange_by_coin)
 
-router.put('/config/update', LoginController.config)
+router.put('/config/update', UserController.config)
 
-router.post('/friend/request', LoginController.request_friend)
-router.post('/friend/request/cancel', LoginController.cancel_request_friend)
+router.post('/friend/request', UserController.request_friend)
+router.post('/friend/request/cancel', UserController.cancel_request_friend)
 
-router.use('/', LoginController.index)
+router.post('/nofication/create', UserController.create_nofication)
+
+router.use('/', UserController.index)
 
 
 module.exports = router

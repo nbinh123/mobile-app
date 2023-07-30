@@ -71,7 +71,7 @@ route(app)
 
 
 
-const IP = "192.168.1.54"
+const IP = "192.168.1.6"
 const { Server } = require("socket.io")
 const io = new Server(server, {
     // Cấu hình socket.io sử dụng đường dẫn /socket.io
@@ -126,6 +126,10 @@ io.on('connection', (socket) => {
     let distance = 0, windy = 0, height = 0, windyWay = "forward", differenceHeight = "more", angle, force, totalPart = 0
     // khi người dùng đăng nhập thành công, server sẽ yêu cầu id và socket.id để lưu vào biến onlineUsers
     socket.on("Client-send-socket-info", (data) => onlineUsers.push(data))
+    // data = {
+    //  socketId
+    //  id
+    //}
 
 
     let checkDistance = () => {
@@ -489,6 +493,7 @@ io.on('connection', (socket) => {
         // nếu có thì trả về socketId
             socket.emit("Server-send-status-request-friend", {
                 status: 200,
+                // trả về socket của người đó
                 socketID: arr[0].socketID
             })
         }

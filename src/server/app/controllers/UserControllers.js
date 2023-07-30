@@ -489,9 +489,8 @@ class UserController {
                 $push: {
                     waitingAddFriendResponse: myId
                 }
-            }, {
-            new: true
-        }
+            }, 
+            { new: true }
         )
             .then(updated => res.json(updated))
     }
@@ -499,15 +498,19 @@ class UserController {
     cancel_request_friend = async (req, res, next) => {
         const { myId, theirId } = req.body
         UserSchema.findOneAndUpdate(
-            { _id: myId },
+            { _id: theirId },
             {
                 $pull: {
-                    waitingAddFriendResponse: theirId
+                    waitingAddFriendResponse: myId
                 }
-            }, {
-            new: true
-        })
+            },
+            { new: true }
+        )
             .then(updated => res.json(updated))
+    }
+    //  [POST]      /nofications/create
+    create_nofication = async (req, res, next) => {
+
     }
 }
 
