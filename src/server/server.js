@@ -95,7 +95,7 @@ const sharedLocationMembers = [
         name: 'Admin',
         lat: 16.064742,
         long: 108.205518,
-        id: 1
+        id: "64aa4c3301483be3981f592e"
     }, {
         name: "A",
         lat: 16.062470,
@@ -411,6 +411,8 @@ io.on('connection', (socket) => {
             long: myLong,
             id: myId,
         })
+        console.log(myLat, 
+            myLong);
         // let primaryArr = [...sharedLocationMembers]  
         // mảng này sẽ trả cho người dùng
         // vĩ độ: lat
@@ -441,15 +443,15 @@ io.on('connection', (socket) => {
             const distance = calculateDistance(Number(user.lat), Number(user.long), Number(myLat), Number(myLong))
             if (distance <= 999999 && user.id !== myId) {
                 if (strangersLocation.length <= quantity) {
+                    user.distance = (distance * 1000).toFixed(2)
                     strangersLocation.push(user)
-                    strangersLocation[index].distance = (distance * 1000).toFixed(2)
-                }
+                    // strangersLocation[index].distance = (distance * 1000).toFixed(2)
+                } 
             } else {
                 // strangersLocation.push((distance*1000).toFixed(2))
             }
         })
         // gửi về lại cho client
-        console.log(strangersLocation)
     })
     socket.on("Client-request-strangers-location", () => {
         socket.emit("Server-send-strangers-around", strangersLocation)
@@ -498,13 +500,8 @@ io.on('connection', (socket) => {
             })
         }
     })
-    socket.on("Client-send-request-to-someone", (data) => {
-        io.to(data.theirId).emit("Someone-send-friend-request", {
-            id: data.fromId,
-            decription: `${data.name ? data.name : "Người dùng ẩn danh"} đã gửi cho bạn lời mời kết bạn`,
-            avatar: data.avatar,
-            date: Date.now()
-        })
+    socket.on("Client-refresh-nofications", (socketId) => {
+        io.to(socketId).emit("Server-refresh-nofications")
     })
 });
 

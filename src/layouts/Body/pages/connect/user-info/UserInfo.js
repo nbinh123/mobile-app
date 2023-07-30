@@ -67,25 +67,31 @@ function Info() {
         // chỉ gọi API để lưu vào csdl nếu người dùng không online, nếu người dùng online thì gửi trực tiếp bằng socket
         socket.emit("Client-send-request-friend", info._id)
         socket.on("Server-send-status-request-friend", async (data) => {
+            console.log(data)
             // nếu như server không có socketId của người dùng này ( nghĩa là họ không online ) thì vẫn lưu vào csdl nhưng status là false
             // gọi API để lưu vào csdl
             if (data.status !== 200) {
-                postAPI('http://${IP}:5000/api/user/nofications/create', {
+                // tạo thông báo cho người nhận lời mời kết bạn
+                await postAPI(`http://${IP}:5000/api/user/nofication/create`, {
                     fromId: userData._id,
+                    toId: info._id,
                     date: formattedTime,
                     avatar: userData.img ? userData.img : defaultAvatar.current,
-                    status: false,
-                    decription: `${userData.name ? userData.name : "Người dùng ẩn danh"} đã gửi cho bạn lời mời kết bạn!!   `
+                    status: 0,
+                    description: `${userData.name ? userData.name : "Người dùng ẩn danh"} đã gửi cho bạn lời mời kết bạn!!`,
+                    url: `/connect/find/${userData._id}/info`
                 })
             } else {
                 // server sẽ tự tạo date ( thời gian gửi )
-                socket.emit("Client-send-request-to-someone", {
-                    theirId: data.socketId,
-                    name: userData?.name,
+                await postAPI(`http://${IP}:5000/api/user/nofications/create`, {
                     fromId: userData._id,
-                    avatar: info.img ? info.image : defaultAvatar.current,
-                    date: formattedTime
+                    toId: info._id,
+                    date: formattedTime,
+                    avatar: userData.img ? userData.img : defaultAvatar.current,
+                    status: 1,
+                    decription: `${userData.name ? userData.name : "Người dùng ẩn danh"} đã gửi cho bạn lời mời kết bạn!!`
                 })
+                socket.emit("Client-refresh-nofications", data.socketId)
             }
 
             // thêm vào danh sách đợi chấp nhận lời mời kết bạn

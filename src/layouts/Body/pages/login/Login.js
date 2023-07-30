@@ -87,6 +87,7 @@ function Login() {
 
             setLongitude(longitude)
             setLatitude(latitude)
+            // lấy địa chỉ
             socket.emit("Client-request-strangers-location-first", {
                 name: await name,
                 myId: await id,
@@ -96,17 +97,20 @@ function Login() {
                 radius: 180, //(m)
                 quantity: 5,
             })
-
+            // lấy thông tin để chia sẻ địa chỉ
             socket.emit("Client-send-socket-info", {
                 id: await id,
                 socketId: socket.id
             })
+            // lấy thông tin những người lạ ở gần
             socket.emit("Client-request-strangers-location")
+            // nhận thông tin những người lạ ở gần và lưu vào biến
             socket.on("Server-send-strangers-around", (arrStrangers) => {
                 setStrangerList(arrStrangers)
                 console.log(arrStrangers)
             })
-            // Tiếp tục xử lý với thông tin kinh độ và vĩ độ
+            // lấy danh sách thông báo của user
+            socket.emit("Client-refresh-nofications", socket.id)
         } catch (error) {
             console.log('Không thể lấy thông tin vị trí:', error);
         }
@@ -131,7 +135,7 @@ function Login() {
         console.log("đăng nhập")
         async function log(id, status, name) {
             if (status === 200) {
-                await getAPI(`http://${IP}:5000/api/user/get`, {
+                await getAPI(`http://${IP}:5000/api/user/get`, { 
                     id: id
                 }, () => { },
                     async (response) => {

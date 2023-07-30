@@ -9,6 +9,7 @@ import Body from './src/layouts/Body/Body';
 import Footer from "./src/layouts/Footer/Footer";
 import Login from "./src/layouts/Body/pages/login/Login";
 import Register from "./src/layouts/Body/pages/register/Register";
+import getAPI from "./src/server/axios/getAPI";
 
 
 const styles = StyleSheet.create({
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
 });
-const IP = "192.168.1.5"                           // địa chỉ IP của server, khi hosting chỉ cần thay đổi IP là tên mình đăng ký
+const IP = "192.168.1.6"                           // địa chỉ IP của server, khi hosting chỉ cần thay đổi IP là tên mình đăng ký
 const socket = io.connect(`http://${IP}:5000`)      // kết nối với server socket
 
 export default function App() {
@@ -36,10 +37,25 @@ export default function App() {
   const [longitude, setLongitude] = useState(null)
   const [latitude, setLatitude] = useState(null)
   const [strangerList, setStrangerList] = useState([])
+  // chức năng thông báo
+  const [nofications, setNofications] = useState([])
+
+
 
   const userDataCurrent = useRef(null)
 
   const Main = () => {
+
+    useEffect(() => {
+      // lắng nghe real-time, xem có ai gửi thông báo tới không, nếu có thi gọi API để lấy
+      socket.on("Server-refresh-nofications", async () => {
+        // gọi API để thiết lập lại thông báo
+        getAPI(`http://${IP}:5000/api/user/nofications/get`, {
+          id: await userData._id
+        }, setNofications)
+      })
+    },[])
+
     return (
       <>
         <Body />
@@ -77,6 +93,7 @@ export default function App() {
       setLatitude,    // cập nhật vĩ độ người dùng
       strangerList,   // danh sách những người ở gần
       setStrangerList,// cập nhập danh sách những người ở gần
+      nofications,    // những thông báo được gửi đến user
     }}>
       <ImageBackground
         source={{ uri: "https://topshare.vn/wp-content/uploads/2021/10/hinh-nen-mau-tim-cute-1-569x1024.gif" }}

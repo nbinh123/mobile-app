@@ -27,6 +27,7 @@ router.post('/friend/request', UserController.request_friend)
 router.post('/friend/request/cancel', UserController.cancel_request_friend)
 
 router.post('/nofication/create', UserController.create_nofication)
+router.get('/nofications/get', UserController.get_nofications)
 
 router.use('/', UserController.index)
 

@@ -489,7 +489,7 @@ class UserController {
                 $push: {
                     waitingAddFriendResponse: myId
                 }
-            }, 
+            },
             { new: true }
         )
             .then(updated => res.json(updated))
@@ -508,9 +508,36 @@ class UserController {
         )
             .then(updated => res.json(updated))
     }
-    //  [POST]      /nofications/create
+    //  [POST]      /nofication/create
     create_nofication = async (req, res, next) => {
 
+        const { fromId, toId, date, avatar, status, description } = req.body
+        console.log("đã gửi lên server");
+        console.log(req.body)
+
+        const response = await UserSchema.findOneAndUpdate(
+            { _id: toId },
+            {
+                $push: {
+                    nofications: {
+                        from: fromId,
+                        date: date,
+                        status: Boolean(Number(status)),
+                        avatar: avatar,
+                        description: description
+                    }
+                }
+            }, {
+            new: true
+        }
+        )
+        res.json(response)
+    }
+    //  [GET]       /nofications/get
+    get_nofications = async (req, res, next) => {
+        const { id } = req.query
+        const userData = await UserSchema.findById(id, 'nofications')
+        res.json(userData.nofications) 
     }
 }
 
