@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
 });
 const IP = "192.168.1.6"                           // địa chỉ IP của server, khi hosting chỉ cần thay đổi IP là tên mình đăng ký
-const socket = io.connect(`http://${IP}:5000`)      // kết nối với server socket
+const socket = io.connect(`http://${IP}:5000`)     // kết nối với server socket
 
 export default function App() {
 
